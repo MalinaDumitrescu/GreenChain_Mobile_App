@@ -13,4 +13,15 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "GreenChain"
-include(":app")
+include(":app",
+    ":core:model",
+    ":core:data",
+    ":core:network",
+    ":core:database",
+    ":feature:scan",
+    ":feature:leaderboard",
+    ":feature:social",
+    ":feature:quests",
+    ":feature:map",
+    ":feature:notifications"
+)
