@@ -3,4 +3,36 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.hilt) apply false
+
+    // Quality gates at root added later
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.detekt)
+}
+
+spotless {
+    kotlin {
+        target("**/*.kt")
+        targetExclude("**/build/**")
+        ktlint(libs.versions.ktlint.get())
+        trimTrailingWhitespace()
+        endWithNewline()
+        indentWithSpaces()
+    }
+    kotlinGradle {
+        target("**/*.kts")
+        ktlint(libs.versions.ktlint.get())
+    }
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    autoCorrect = false
+    source.setFrom(files(projectDir))
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml")) // create this file
+}
+
+tasks.register("quality") {
+    group = "verification"
+    dependsOn("spotlessCheck", "detekt")
 }
