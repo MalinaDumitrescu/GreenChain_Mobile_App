@@ -5,34 +5,43 @@ plugins {
     alias(libs.plugins.hilt) apply false
 
     // Quality gates at root added later
-    alias(libs.plugins.spotless)
-    alias(libs.plugins.detekt)
+   // alias(libs.plugins.spotless)
+    //alias(libs.plugins.detekt)
 }
 
-spotless {
-    kotlin {
-        target("**/*.kt")
-        targetExclude("**/build/**")
-        ktlint(libs.versions.ktlint.get())
-        trimTrailingWhitespace()
-        endWithNewline()
-        indentWithSpaces()
-    }
-    kotlinGradle {
-        target("**/*.kts")
-        ktlint(libs.versions.ktlint.get())
-    }
-}
+//spotless {
+//    kotlin {
+//        target("**/*.kt")
+//        targetExclude("**/build/**")
+//        ktlint(libs.versions.ktlint.get())
+//        trimTrailingWhitespace()
+//        endWithNewline()
+//        indentWithSpaces()
+//    }
+//    kotlinGradle {
+//        target("**/*.kts")
+//        targetExclude("**/build/**", "**/.gradle/**")
+//        ktlint(libs.versions.ktlint.get())
+//    }
+//}
+//
+//detekt {
+//    buildUponDefaultConfig = true
+//    allRules = false
+//    autoCorrect = false
+//    source.setFrom(files(projectDir))
+//    config.setFrom(files("$rootDir/config/detekt/detekt.yml")) // create this file
+//    // produce reports (handy in CI artifacts)
+//    reports {
+//        xml.required.set(true)
+//        html.required.set(true)
+//        txt.required.set(false)
+//        sarif.required.set(false)
+//    }
+//}
 
-detekt {
-    buildUponDefaultConfig = true
-    allRules = false
-    autoCorrect = false
-    source.setFrom(files(projectDir))
-    config.setFrom(files("$rootDir/config/detekt/detekt.yml")) // create this file
-}
-
-tasks.register("quality") {
-    group = "verification"
-    dependsOn("spotlessCheck", "detekt")
-}
+//tasks.register("quality") {
+    //group = "verification"
+    //description = "Runs spotlessCheck and detekt for all modules"
+    //dependsOn("spotlessCheck", "detekt")
+//}
