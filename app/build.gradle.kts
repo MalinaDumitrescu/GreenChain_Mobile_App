@@ -81,5 +81,19 @@ dependencies {
     // todo added for MainActivity double check in the future
     implementation(libs.compose.material.icons.extended)
 
+    dependencies {
+        implementation(project(":core:model"))
+        implementation(project(":core:data"))
+        implementation(project(":core:network"))
+        implementation(project(":core:database"))
+
+        implementation(project(":feature:leaderboard"))
+        implementation(project(":feature:map"))
+        implementation(project(":feature:notifications"))
+        implementation(project(":feature:quests"))
+        implementation(project(":feature:scan"))
+        implementation(project(":feature:social"))
+    }
+
 
 }
