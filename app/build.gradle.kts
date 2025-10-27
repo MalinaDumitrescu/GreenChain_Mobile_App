@@ -13,7 +13,7 @@ android {
     defaultConfig {
         applicationId = "com.greenchain.app"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 34          // it can be 35
         versionCode = 1
         versionName = "0.1.0"
 
@@ -58,6 +58,13 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.coroutines.android)
 
+    // Unit tests
+    testImplementation(libs.junit)
+
+    // Instrumented Android tests
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.foundation)
@@ -72,8 +79,7 @@ dependencies {
 
 
     // todo added for MainActivity double check in the future
-    implementation("androidx.compose.material:material-icons-extended")
-
+    implementation(libs.compose.material.icons.extended)
 
 
 }
