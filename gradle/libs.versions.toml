@@ -26,6 +26,8 @@ retrofit = "2.11.0"
 okhttp = "4.12.0"
 moshi = "1.15.1"
 room = "2.6.1"
+appcompat-version = "1.6.1"
+material = "1.10.0"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
@@ -63,6 +65,8 @@ moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "mosh
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-ktx     = { module = "androidx.room:room-ktx",     version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat-version" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -74,3 +78,4 @@ compose-compiler    = { id = "org.jetbrains.kotlin.plugin.compose", version.ref 
 # added later
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 detekt   = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+android-library = { id = "com.android.library", version.ref = "agp" }
