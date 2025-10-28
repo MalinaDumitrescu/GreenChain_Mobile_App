@@ -3,3 +3,11 @@
 
     <style name="Theme.Greenchain" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
+
+
+<!--<resources>-->
+<!--<style name="Theme.GreenChain" parent="Theme.Material3.DayNight.NoActionBar">-->
+<!--    &lt;!&ndash; Optional platform colors/overrides &ndash;&gt;-->
+<!--</style>-->
+<!--</resources>-->
+

@@ -74,8 +74,9 @@ kotlin-android      = { id = "org.jetbrains.kotlin.android",  version.ref = "kot
 ksp                 = { id = "com.google.devtools.ksp",        version.ref = "ksp" }
 hilt                = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 compose-compiler    = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+
 
 # added later
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 detekt   = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-android-library = { id = "com.android.library", version.ref = "agp" }
