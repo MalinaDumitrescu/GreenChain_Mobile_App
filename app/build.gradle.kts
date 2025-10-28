@@ -51,49 +51,46 @@ android {
 }
 
 dependencies {
+    // Compose BOM first
     implementation(platform(libs.compose.bom))
+
+    // AndroidX + Compose
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.coroutines.android)
 
-    // Unit tests
-    testImplementation(libs.junit)
-
-    // Instrumented Android tests
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.test.espresso.core)
-
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.foundation)
     implementation(libs.compose.runtime)
     implementation(libs.compose.material3)
-    implementation(libs.play.services.maps)
+    implementation(libs.compose.material.icons.extended)
     debugImplementation(libs.compose.ui.tooling)
 
-    // Hilt (with KSP)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    // Google Maps (if needed)
+    implementation(libs.play.services.maps)
 
+    // Hilt (KSP)
+    implementation(libs.hilt.android)   // <-- CORRECT accessor
+    ksp(libs.hilt.compiler)             // <-- CORRECT accessor
 
-    // todo added for MainActivity double check in the future
-    implementation(libs.compose.material.icons.extended)
+    // Tests
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.espresso.core)
 
-    dependencies {
-        implementation(project(":core:model"))
-        implementation(project(":core:data"))
-        implementation(project(":core:network"))
-        implementation(project(":core:database"))
+    // Projects (moved out of the wrong nested dependencies block)
+    implementation(project(":core:model"))
+    implementation(project(":core:data"))
+    implementation(project(":core:network"))
+    implementation(project(":core:database"))
 
-        implementation(project(":feature:leaderboard"))
-        implementation(project(":feature:map"))
-        implementation(project(":feature:notifications"))
-        implementation(project(":feature:quests"))
-        implementation(project(":feature:scan"))
-        implementation(project(":feature:social"))
-    }
-
-
+    implementation(project(":feature:leaderboard"))
+    implementation(project(":feature:map"))
+    implementation(project(":feature:notifications"))
+    implementation(project(":feature:quests"))
+    implementation(project(":feature:scan"))
+    implementation(project(":feature:social"))
 }
