@@ -1,9 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp) // <- typo guard: ensure 'libs' not 'llibs'
+    alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.google.firebase.crashlytics)
+
 }
 
 android {
@@ -51,6 +54,13 @@ android {
 }
 
 dependencies {
+
+    implementation(libs.room.compiler)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    //kps(libs.room.compiler)
+
+
     // Compose BOM first
     implementation(platform(libs.compose.bom))
 
@@ -67,6 +77,7 @@ dependencies {
     implementation(libs.compose.runtime)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
+    implementation(libs.firebase.crashlytics)
     debugImplementation(libs.compose.ui.tooling)
 
     // Google Maps (if needed)
@@ -75,6 +86,15 @@ dependencies {
     // Hilt (KSP)
     implementation(libs.hilt.android)   // <-- CORRECT accessor
     ksp(libs.hilt.compiler)             // <-- CORRECT accessor
+
+
+    // ---- Firebase (use BOM to pin all versions) ----
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics.ktx)
 
     // Tests
     testImplementation(libs.junit)
@@ -93,4 +113,5 @@ dependencies {
     implementation(project(":feature:quests"))
     implementation(project(":feature:scan"))
     implementation(project(":feature:social"))
+    implementation (project(":feature:auth"))
 }

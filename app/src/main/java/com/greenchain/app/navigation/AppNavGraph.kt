@@ -5,24 +5,37 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.greenchain.app.ui.screens.*
+// dacă AuthScreen e în modul feature/auth:
+import com.greenchain.feature.auth.AuthScreen
 
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
-    startDestination: String = Routes.Onboarding
+    startDestination: String
 ) {
     NavHost(navController, startDestination = startDestination) {
+
         composable(Routes.Onboarding) {
             OnboardingScreen(
                 onContinue = {
-                    navController.navigate(Routes.Home) {
-                        popUpTo(Routes.Onboarding) {
-                            inclusive = true
-                        }
+                    // după onboarding mergem la Auth (dacă vrei direct Home, schimbă ruta aici)
+                    navController.navigate(Routes.Auth) {
+                        popUpTo(Routes.Onboarding) { inclusive = true }
                     }
                 }
             )
         }
+
+        composable(Routes.Auth) {
+            AuthScreen(
+                onSuccess = {
+                    navController.navigate(Routes.Home) {
+                        popUpTo(Routes.Auth) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Routes.Home) { HomeScreen() }
         composable(Routes.Scan) { ScanScreen() }
         composable(Routes.Map) { MapScreen() }
