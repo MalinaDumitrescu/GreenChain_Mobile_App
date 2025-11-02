@@ -24,6 +24,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import android.util.Log
 import com.greenchain.core.database.AppDatabase
 
+import com.greenchain.app.ui.components.BottomNavBar
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -55,6 +56,7 @@ class MainActivity : ComponentActivity() {
             GreenChainTheme {
                 val navController = rememberNavController()
                 val backStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = backStackEntry?.destination?.route ?: Routes.Home.route
 
                 // TODO: replace with real DataStore check
                 val onboardingDone = false
@@ -68,53 +70,26 @@ class MainActivity : ComponentActivity() {
                     Routes.Home,
                     Routes.Scan,
                     Routes.Map,
-                    Routes.Feed,
                     Routes.Leaderboard,
                     Routes.Profile
                 )
 
                 Scaffold(
                     bottomBar = {
-                        val route = backStackEntry?.destination?.route
-                        val hideBar = route == Routes.Onboarding || route == Routes.Auth
-                        if (!hideBar) {
-                            NavigationBar {
-                                topLevel.forEach { r ->
-                                    val selected = backStackEntry?.destination
-                                        ?.hierarchy
-                                        ?.any { dest -> dest.route == r } == true
-
-                                    val icon = when (r) {
-                                        Routes.Home -> Icons.Filled.Home
-                                        Routes.Scan -> Icons.Filled.CameraAlt
-                                        Routes.Map -> Icons.Filled.Map
-                                        Routes.Feed -> Icons.Filled.Public
-                                        Routes.Leaderboard -> Icons.Filled.EmojiEvents
-                                        Routes.Profile -> Icons.Filled.Person
-                                        else -> Icons.Filled.Home
-                                    }
-
-                                    val labelText = if (r.isNotEmpty())
-                                        r.replaceFirstChar { ch ->
-                                            if (ch.isLowerCase()) ch.titlecase() else ch.toString()
+                        // Hide bottom bar on onboarding and auth screens
+                        if (currentRoute != Routes.Onboarding.route && currentRoute != Routes.Auth.route) {
+                            BottomNavBar(
+                                selectedRoute = currentRoute,
+                                onClick = { route ->
+                                    navController.navigate(route) {
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            saveState = true
                                         }
-                                    else r
-
-                                    NavigationBarItem(
-                                        selected = selected,
-                                        onClick = {
-                                            navController.navigate(r) {
-                                                popUpTo(navController.graph.startDestinationId) {
-                                                    inclusive = false
-                                                }
-                                                launchSingleTop = true
-                                            }
-                                        },
-                                        icon = { Icon(icon, contentDescription = r) },
-                                        label = { Text(labelText) }
-                                    )
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
                                 }
-                            }
+                            )
                         }
                     }
                 ) { padding ->

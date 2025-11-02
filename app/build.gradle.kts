@@ -70,6 +70,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.coroutines.android)
+    implementation("io.coil-kt:coil-compose:2.7.0")
+
 
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)

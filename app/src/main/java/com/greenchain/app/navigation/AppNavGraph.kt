@@ -13,8 +13,7 @@ fun AppNavGraph(
     navController: NavHostController,
     startDestination: String
 ) {
-    NavHost(navController, startDestination = startDestination) {
-
+    NavHost(navController = navController, startDestination = startDestination) {
         composable(Routes.Onboarding) {
             OnboardingScreen(
                 onContinue = {
@@ -25,7 +24,7 @@ fun AppNavGraph(
                 }
             )
         }
-
+        
         composable(Routes.Auth) {
             AuthScreen(
                 onSuccess = {
@@ -35,12 +34,25 @@ fun AppNavGraph(
                 }
             )
         }
-
-        composable(Routes.Home) { HomeScreen() }
-        composable(Routes.Scan) { ScanScreen() }
-        composable(Routes.Map) { MapScreen() }
-        composable(Routes.Feed) { FeedScreen() }
-        composable(Routes.Leaderboard) { LeaderboardScreen() }
-        composable(Routes.Profile) { ProfileScreen() }
+        
+        composable(Routes.Home.route) { 
+            HomeScreen() 
+        }
+        
+        composable(Routes.Scan.route) { 
+            ScanScreen() 
+        }
+        
+        composable(Routes.Map.route) { 
+            MapScreen() 
+        }
+        
+        composable(Routes.Leaderboard.route) { 
+            LeaderboardScreen() 
+        }
+        
+        composable(Routes.Profile.route) { 
+            ProfileScreen() 
+        }
     }
 }
