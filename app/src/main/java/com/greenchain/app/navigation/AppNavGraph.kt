@@ -4,19 +4,55 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.greenchain.app.ui.screens.HomeScreen
+import com.greenchain.app.ui.screens.*
+// dacă AuthScreen e în modul feature/auth:
+import com.greenchain.feature.auth.AuthScreen
 
 @Composable
-fun AppNavGraph(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = Routes.Home.route) {
-
-        composable(Routes.Home.route) {
-            HomeScreen()
+fun AppNavGraph(
+    navController: NavHostController,
+    startDestination: String
+) {
+    NavHost(navController = navController, startDestination = startDestination) {
+        composable(Routes.Onboarding) {
+            OnboardingScreen(
+                onContinue = {
+                    // după onboarding mergem la Auth (dacă vrei direct Home, schimbă ruta aici)
+                    navController.navigate(Routes.Auth) {
+                        popUpTo(Routes.Onboarding) { inclusive = true }
+                    }
+                }
+            )
         }
-
-        // composable(Routes.Scan.route) { ... }
-        // composable(Routes.Map.route) { ... }
-        // composable(Routes.Leaderboard.route) { ... }
-        // composable(Routes.Profile.route) { ... }
+        
+        composable(Routes.Auth) {
+            AuthScreen(
+                onSuccess = {
+                    navController.navigate(Routes.Home) {
+                        popUpTo(Routes.Auth) { inclusive = true }
+                    }
+                }
+            )
+        }
+        
+        composable(Routes.Home.route) { 
+            HomeScreen() 
+        }
+        
+        composable(Routes.Scan.route) { 
+            ScanScreen() 
+        }
+        
+        composable(Routes.Map.route) { 
+            MapScreen() 
+        }
+        
+        composable(Routes.Leaderboard.route) { 
+            LeaderboardScreen() 
+        }
+        
+        composable(Routes.Profile.route) { 
+            ProfileScreen() 
+        }
     }
 }

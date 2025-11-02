@@ -1,12 +1,13 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
-    namespace = "com.greenchain.core.database"
+    namespace = "com.greenchain.feature.auth"
     compileSdk = 34
 
     defaultConfig {
@@ -30,22 +31,38 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
+
+    buildFeatures { compose = true }
 }
 
 dependencies {
+    // Project deps (if you need data/network)
     implementation(project(":core:model"))
+    implementation(project(":core:data"))
+    implementation(project(":core:network"))
 
-    // Room (safe to add now; you’ll wire entities/DAOs later)
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
+    // Compose via BOM
+    implementation(platform(libs.compose.bom))
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.compose.ui)
+    implementation(libs.compose.ui.tooling)
+    implementation(libs.compose.material3)
 
-    // Test deps (optional)
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
+
+    // Firebase (if this module talks directly to Firebase Auth)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+
+    // AndroidX core
+    implementation(libs.androidx.core.ktx)
+
+    // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
-
-    // Hilt (if you provide DB/DAOs here) TODO
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
 }

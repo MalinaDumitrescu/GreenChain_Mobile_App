@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "750358495777",
+    "project_id": "app-4b6562de",
+    "storage_bucket": "app-4b6562de.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:750358495777:android:6297434eff79f927611960",
+        "android_client_info": {
+          "package_name": "com.greenchain.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClYa4bC4WgCWh5KR85MeAmi7ZhJbZ46pw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

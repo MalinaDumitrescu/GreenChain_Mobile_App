@@ -6,12 +6,11 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class DataModule {
+interface DataModule {
+
     @Binds
-    @Singleton
-    abstract fun bindRepository(impl: RepositoryImpl): Repository
+    fun bindRepository(impl: RepositoryImpl): Repository
 }
