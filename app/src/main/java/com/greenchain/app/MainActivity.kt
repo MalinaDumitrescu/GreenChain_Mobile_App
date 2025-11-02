@@ -17,6 +17,8 @@ import com.greenchain.app.ui.theme.GreenChainTheme
 
 // todo added later
 import androidx.compose.material.icons.filled.*
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.greenchain.app.ui.components.BottomNavBar
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -29,56 +31,43 @@ class MainActivity : ComponentActivity() {
                     Routes.Home,
                     Routes.Scan,
                     Routes.Map,
-                    Routes.Feed,
                     Routes.Leaderboard,
                     Routes.Profile
                 )
 
-                Scaffold(
-                    bottomBar = {
-                        val currentRoute = navController.currentBackStackEntry
-                            ?.destination
-                            ?.route
+                setContent {
+                    GreenChainTheme {
+                        val navController = rememberNavController()
 
-                        // Hide bottom bar on Onboarding
-                        if (currentRoute != Routes.Onboarding) {
-                            NavigationBar {
-                                topLevel.forEach { route ->
-                                    val selected = navController.currentBackStackEntry
-                                        ?.destination
-                                        ?.hierarchy
-                                        ?.any { it.route == route } == true
+                        val backStackEntry by navController.currentBackStackEntryAsState()
+                        val currentRoute = backStackEntry?.destination?.route ?: Routes.Home.route
 
-                                    val icon = when (route) {
-                                        Routes.Home -> Icons.Filled.Home
-                                        Routes.Scan -> Icons.Filled.CameraAlt
-                                        Routes.Map -> Icons.Filled.Map
-                                        Routes.Feed -> Icons.Filled.Public
-                                        Routes.Leaderboard -> Icons.Filled.EmojiEvents
-                                        Routes.Profile -> Icons.Filled.Person
-                                        else -> Icons.Filled.Home
-                                    }
+                        Scaffold(
+                            bottomBar = {
 
-                                    NavigationBarItem(
-                                        selected = selected,
-                                        onClick = {
+                                if (currentRoute != Routes.Onboarding.route) {
+                                    BottomNavBar(
+                                        selectedRoute = currentRoute,
+                                        onClick = { route ->
                                             navController.navigate(route) {
-                                                popUpTo(Routes.Home) { inclusive = false }
+                                                popUpTo(navController.graph.startDestinationId) {
+                                                    saveState = true
+                                                }
                                                 launchSingleTop = true
+                                                restoreState = true
                                             }
-                                        },
-                                        icon = { Icon(icon, contentDescription = route) },
-                                        label = { Text(route.replaceFirstChar { it.uppercase() }) }
+                                        }
                                     )
                                 }
                             }
+                        ) { inner ->
+                            Surface(Modifier.padding(inner)) {
+                                AppNavGraph(navController = navController)
+                            }
                         }
                     }
-                ) { inner ->
-                    Surface(Modifier.padding(inner)) {
-                        AppNavGraph(navController = navController)
-                    }
                 }
+
             }
         }
     }

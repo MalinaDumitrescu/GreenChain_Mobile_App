@@ -1,23 +1,54 @@
 package com.greenchain.app.ui.screens
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-
-@Composable fun HomeScreen() = Placeholder("Home")
-@Composable fun ScanScreen() = Placeholder("Scan")
-@Composable fun MapScreen() = Placeholder("Map")
-@Composable fun FeedScreen() = Placeholder("Feed")
-@Composable fun LeaderboardScreen() = Placeholder("Leaderboard")
-@Composable fun ProfileScreen() = Placeholder("Profile / Settings")
+import androidx.compose.ui.unit.dp
+import com.greenchain.app.ui.components.*
+import com.greenchain.app.ui.components.tokens.GCSpacing
 
 @Composable
-private fun Placeholder(title: String) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(title, style = MaterialTheme.typography.headlineMedium)
+fun HomeScreen(onContinue: () -> Unit = {}) {
+    Surface(color = MaterialTheme.colorScheme.background) {
+        Column {
+            TopBar()
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(GCSpacing.md),
+                verticalArrangement = Arrangement.spacedBy(GCSpacing.md)
+            ) {
+                item {
+                    QuoteCard()
+                }
+                item {
+                    QuestCard(title = "Quest of the day", progress = 0.1f, onView = onContinue)
+                }
+                item {
+                    StatsCard(
+                        stats = listOf(
+                            "3" to "Bottles recycled today",
+                            "20" to "Total",
+                            "4kg" to "CO2 saved"
+                        )
+                    )
+                }
+                item {
+                    CommunityPostCard(
+                        author = "Janine",
+                        time = "1h ago",
+                        text = "Weekly reminder to water your plants!!",
+                        imageUrl = "https://images.unsplash.com/photo-1501676491271-5e2f2e0d3c59?q=80&w=1200&auto=format",
+                        avatarUrl = "https://i.pravatar.cc/100?img=5"
+                    )
+                }
+                item { Spacer(Modifier.height(80.dp)) }
+            }
+        }
     }
 }
+
