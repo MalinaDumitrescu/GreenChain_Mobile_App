@@ -1,16 +1,18 @@
 package com.greenchain.core.data.di
 
-import com.greenchain.core.data.Repository
-import com.greenchain.core.data.RepositoryImpl
-import dagger.Binds
+import com.greenchain.core.data.repository.UserRepository
+import com.greenchain.core.database.dao.UserDao
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
-interface DataModule {
+object DataModule {
 
-    @Binds
-    fun bindRepository(impl: RepositoryImpl): Repository
+    @Provides
+    fun provideUserRepository(userDao: UserDao): UserRepository {
+        return UserRepository(userDao)
+    }
 }
