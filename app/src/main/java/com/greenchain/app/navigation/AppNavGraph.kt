@@ -14,45 +14,45 @@ fun AppNavGraph(
     startDestination: String
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
-        composable(Routes.Onboarding) {
+        composable(Routes.Onboarding.route) {
             OnboardingScreen(
                 onContinue = {
                     // după onboarding mergem la Auth (dacă vrei direct Home, schimbă ruta aici)
-                    navController.navigate(Routes.Auth) {
-                        popUpTo(Routes.Onboarding) { inclusive = true }
+                    navController.navigate(Routes.Auth.route) {
+                        popUpTo(Routes.Onboarding.route) { inclusive = true }
                     }
                 }
             )
         }
-        
-        composable(Routes.Auth) {
+
+        composable(Routes.Auth.route) {
             AuthScreen(
                 onSuccess = {
-                    navController.navigate(Routes.Home) {
-                        popUpTo(Routes.Auth) { inclusive = true }
+                    navController.navigate(Routes.Home.route) {
+                        popUpTo(Routes.Auth.route) { inclusive = true }
                     }
                 }
             )
         }
-        
-        composable(Routes.Home.route) { 
-            HomeScreen() 
+
+        composable(Routes.Home.route) {
+            HomeScreen()
         }
-        
-        composable(Routes.Scan.route) { 
-            ScanScreen() 
+
+        composable(Routes.Scan.route) {
+            ScanScreen()
         }
-        
-        composable(Routes.Map.route) { 
-            MapScreen() 
+
+        composable(Routes.Map.route) {
+            MapScreen()
         }
-        
-        composable(Routes.Leaderboard.route) { 
-            LeaderboardScreen() 
+
+        composable(Routes.Leaderboard.route) {
+            LeaderboardScreen()
         }
-        
-        composable(Routes.Profile.route) { 
-            ProfileScreen() 
+
+        composable(Routes.Profile.route) {
+            ProfileScreen()
         }
     }
 }
