@@ -11,7 +11,7 @@ plugins {
     alias(libs.plugins.google.firebase.crashlytics) apply false
 }
 
-// ✅ Se aplică DOAR modulelor (nu root-ului)
+//  Se aplică DOAR modulelor (nu root-ului)
 subprojects {
 
     // 1) Elimină vechile adnotări IntelliJ care îți dublează clasele
