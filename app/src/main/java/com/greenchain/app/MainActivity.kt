@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
                     Box(Modifier.padding(padding)) {
                         AppNavGraph(
                             navController = navController,
-                            startDestination = start
+                            startDestination = start.route
                         )
                     }
                 }
