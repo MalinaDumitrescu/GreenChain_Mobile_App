@@ -1,21 +1,30 @@
 {
   "project_info": {
-    "project_number": "750358495777",
-    "project_id": "app-4b6562de",
-    "storage_bucket": "app-4b6562de.firebasestorage.app"
+    "project_number": "940825290883",
+    "project_id": "greenchain-1134d",
+    "storage_bucket": "greenchain-1134d.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:750358495777:android:6297434eff79f927611960",
+        "mobilesdk_app_id": "1:940825290883:android:8eb34139b15b1b0c3093b6",
         "android_client_info": {
           "package_name": "com.greenchain.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "940825290883-s2mlp053q6en74qrsm22iiombipof439.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.greenchain.app",
+            "certificate_hash": "cc9f0f33409e43c0c968a29a286ac441fc2c765d"
+          }
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyClYa4bC4WgCWh5KR85MeAmi7ZhJbZ46pw"
+          "current_key": "AIzaSyC9nZhjuL1VEaD-CHvaF3WZGxuGFmm-xJM"
         }
       ],
       "services": {

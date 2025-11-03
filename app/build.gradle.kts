@@ -55,10 +55,9 @@ android {
 
 dependencies {
 
-    implementation(libs.room.compiler)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    //kps(libs.room.compiler)
+    ksp(libs.room.compiler)
 
 
     // Compose BOM first
@@ -95,6 +94,7 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics.ktx)
+
 
     // Tests
     testImplementation(libs.junit)

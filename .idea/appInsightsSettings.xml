@@ -10,9 +10,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.greenchain.app" />
-                  <option name="mobileSdkAppId" value="1:750358495777:android:6297434eff79f927611960" />
-                  <option name="projectId" value="app-4b6562de" />
-                  <option name="projectNumber" value="750358495777" />
+                  <option name="mobileSdkAppId" value="1:940825290883:android:8eb34139b15b1b0c3093b6" />
+                  <option name="projectId" value="greenchain-1134d" />
+                  <option name="projectNumber" value="940825290883" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
