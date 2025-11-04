@@ -8,6 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun AuthScreen(
@@ -18,7 +20,12 @@ fun AuthScreen(
 
     if (ui.success) {
         // navigăm imediat în app
-        LaunchedEffect(Unit) { onSuccess() }
+        LaunchedEffect(Unit) {
+            Firebase.auth.currentUser?.let { user ->
+                vm.onLoginSuccess(user)
+            }
+            onSuccess()
+        }
     }
 
     Column(
