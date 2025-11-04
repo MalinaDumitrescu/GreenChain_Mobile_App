@@ -1,17 +1,16 @@
 package com.greenchain.core.database.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import com.greenchain.core.database.entity.UserEntity
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(user: UserEntity)
+    suspend fun insertUser(user: UserEntity)
 
-    @Query("SELECT * FROM users WHERE uid = :id")
-    suspend fun getUser(id: String): UserEntity?
-
-    @Query("SELECT * FROM users")
-    fun getAllUsers(): Flow<List<UserEntity>>
+    @Query("SELECT * FROM users WHERE id = :id")
+    suspend fun getUserById(id: String): UserEntity?
 }
