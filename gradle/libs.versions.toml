@@ -15,6 +15,7 @@ play-services-maps = "19.2.0"
 google-services = "4.4.2"
 firebase-bom = "33.1.2"
 hilt-navigation-compose = "1.2.0"
+camerax = "1.4.0"
 
 # test file
 junit = "4.13.2"
@@ -49,6 +50,11 @@ compose-material3 = { module = "androidx.compose.material3:material3" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-runtime = { module = "androidx.compose.runtime:runtime" }
 compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+
+camerax-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
+camerax-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
+camerax-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
+camerax-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }

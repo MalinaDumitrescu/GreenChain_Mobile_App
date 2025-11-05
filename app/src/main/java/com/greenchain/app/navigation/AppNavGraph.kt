@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.greenchain.app.ui.screens.*
+import com.greenchain.feature.scan.ui.ScanScreen
 // dacă AuthScreen e în modul feature/auth:
 import com.greenchain.feature.auth.AuthScreen
 
@@ -40,7 +41,12 @@ fun AppNavGraph(
         }
 
         composable(Routes.Scan.route) {
-            ScanScreen()
+            ScanScreen(
+                onCaptured = { uri ->
+                    // TODO: hand off to your ViewModel to upload to RoboFlow
+                    // scanViewModel.detectWithRoboflow(uri)
+                }
+            )
         }
 
         composable(Routes.Map.route) {
