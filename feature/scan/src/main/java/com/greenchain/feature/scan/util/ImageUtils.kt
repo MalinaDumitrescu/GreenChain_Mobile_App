@@ -19,8 +19,14 @@ suspend fun loadBitmap(context: Context, uri: Uri): Bitmap {
     }
 }
 
-/** rel rect in [0f,1f], independent of preview size/aspect */
-fun cropBitmapByRelativeRect(src: Bitmap, relLeft: Float, relTop: Float, relRight: Float, relBottom: Float): Bitmap {
+/** Crop by a relative rectangle in [0f,1f] — matches the on-screen framing square. */
+fun cropBitmapByRelativeRect(
+    src: Bitmap,
+    relLeft: Float,
+    relTop: Float,
+    relRight: Float,
+    relBottom: Float
+): Bitmap {
     val left = (relLeft * src.width).toInt()
     val top = (relTop * src.height).toInt()
     val right = (relRight * src.width).toInt()
