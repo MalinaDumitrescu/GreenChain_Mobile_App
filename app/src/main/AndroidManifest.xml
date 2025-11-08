@@ -13,8 +13,10 @@
         android:theme="@style/Theme.Greenchain"
         tools:targetApi="31">
 
-
-
+        <!-- TODO: Add your Google Maps API key here -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBRhPgFc8gnzCc4PcOHozVX0O7UnH9PgJc" />
 
                 <activity
             android:name=".MainActivity"
