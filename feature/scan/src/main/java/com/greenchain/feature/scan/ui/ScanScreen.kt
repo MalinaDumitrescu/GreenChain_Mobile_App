@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.greenchain.feature.scan.util.cropBitmapByRelativeRect
 import com.greenchain.feature.scan.util.loadBitmap
 import kotlinx.coroutines.delay
@@ -40,20 +41,21 @@ import java.util.*
 @Composable
 fun ScanScreen(
     onCaptured: (Uri) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: ScanViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
 
-    // ---- Framing square (smaller) ----
-    val squareSize = 0.4f // 40% of the view; make smaller like 0.35f or 0.3f if you want tighter
+    // Small centered framing square (only this area will be sent to RoboFlow)
+    val squareSize = 0.4f
     val relLeft = (1f - squareSize) / 2f
     val relTop = (1f - squareSize) / 2f
     val relRight = 1f - relLeft
     val relBottom = 1f - relTop
 
-    // Permissions
+    // Permission state
     var hasCameraPermission by remember { mutableStateOf(false) }
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -65,13 +67,13 @@ fun ScanScreen(
     var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
     var hasCamera by remember { mutableStateOf(false) }
 
-    // Result preview (cropped)
+    // Cropped result bitmap
     var croppedBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-    // Capture state (prevents double taps)
+    // Capture guard
     var isCapturing by remember { mutableStateOf(false) }
 
-    // Shutter feedback: flash + haptic + sound
+    // Shutter feedback
     val haptics = LocalHapticFeedback.current
     var flashOn by remember { mutableStateOf(false) }
     val shutterSound = remember { MediaActionSound().apply { load(MediaActionSound.SHUTTER_CLICK) } }
@@ -82,41 +84,77 @@ fun ScanScreen(
         flashOn = true
         shutterSound.play(MediaActionSound.SHUTTER_CLICK)
         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-        // Auto-hide the flash quickly
         scope.launch {
             delay(120)
             flashOn = false
         }
     }
 
+    // RoboFlow status
+    val isVerifying by viewModel.isVerifying.collectAsState()
+    val isValid by viewModel.isValid.collectAsState()
+
     Box(modifier.fillMaxSize()) {
+
         when {
-            // Show ONLY the cropped square after capture
+            // After capture: show the cropped square + detection status
             croppedBitmap != null -> {
                 Image(
                     bitmap = croppedBitmap!!.asImageBitmap(),
                     contentDescription = "Cropped logo",
                     modifier = Modifier.fillMaxSize()
                 )
-                Row(
-                    Modifier
+
+                Column(
+                    modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    OutlinedButton(onClick = { croppedBitmap = null }) { Text("Retake") }
+                    when {
+                        isVerifying -> {
+                            Text("Checking SGR logo...")
+                            Spacer(Modifier.height(8.dp))
+                            CircularProgressIndicator()
+                        }
+                        isValid == true -> {
+                            Text("✅ SGR logo detected!", color = Color(0xFF1B5E20))
+                            Spacer(Modifier.height(8.dp))
+                            Button(onClick = {
+                                // Hook: update counters / Firestore if needed
+                                viewModel.reset()
+                                croppedBitmap = null
+                            }) {
+                                Text("OK")
+                            }
+                        }
+                        isValid == false -> {
+                            Text("❌ No SGR logo detected.", color = Color(0xFFB71C1C))
+                            Spacer(Modifier.height(8.dp))
+                            OutlinedButton(onClick = {
+                                viewModel.reset()
+                                croppedBitmap = null
+                            }) {
+                                Text("Try Again")
+                            }
+                        }
+                        else -> {
+                            // Waiting for result
+                        }
+                    }
                 }
             }
 
-            // Camera preview + overlay
+            // Live camera preview + framing overlay
             hasCameraPermission -> {
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
                     factory = { ctx ->
                         val previewView = PreviewView(ctx).apply {
-                            // Keep full image visible (letterboxed if needed) so overlay maps to saved bitmap
+                            // Show full camera feed; overlay coords match saved image
                             scaleType = PreviewView.ScaleType.FIT_CENTER
                         }
+
                         val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
                         cameraProviderFuture.addListener({
                             val cameraProvider = cameraProviderFuture.get()
@@ -134,22 +172,25 @@ fun ScanScreen(
                             try {
                                 cameraProvider.unbindAll()
                                 cameraProvider.bindToLifecycle(
-                                    lifecycleOwner, selector, preview, imageCapture
+                                    lifecycleOwner,
+                                    selector,
+                                    preview,
+                                    imageCapture
                                 )
                                 hasCamera = true
                             } catch (_: Exception) {
                                 hasCamera = false
                             }
                         }, ContextCompat.getMainExecutor(ctx))
+
                         previewView
                     }
                 )
 
-                // Visible framing square on top
                 FramingOverlay(relLeft, relTop, relRight, relBottom)
             }
 
-            // Permission request UI
+            // No permission UI
             else -> {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
@@ -164,7 +205,7 @@ fun ScanScreen(
             }
         }
 
-        // Capture button (only when showing camera)
+        // Capture button (only when preview is visible)
         if (hasCameraPermission && hasCamera && croppedBitmap == null) {
             FloatingActionButton(
                 onClick = {
@@ -174,7 +215,8 @@ fun ScanScreen(
                     isCapturing = true
                     triggerShutterFeedback()
 
-                    val name = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(System.currentTimeMillis())
+                    val name = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
+                        .format(System.currentTimeMillis())
                     val contentValues = ContentValues().apply {
                         put(MediaStore.MediaColumns.DISPLAY_NAME, "GC_$name.jpg")
                         put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
@@ -194,19 +236,21 @@ fun ScanScreen(
                         object : ImageCapture.OnImageSavedCallback {
                             override fun onError(exc: ImageCaptureException) {
                                 isCapturing = false
-                                // TODO: Show snackbar/toast if you want
+                                // TODO: show error if needed
                             }
+
                             override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                                 isCapturing = false
                                 output.savedUri?.let { uri ->
-                                    // Still propagate original URI if other flows need it
-                                    onCaptured(uri)
-                                    // Crop the saved image to the visible square
+                                    onCaptured(uri) // if upper layers care
+
                                     scope.launch {
                                         val bmp = loadBitmap(context, uri)
-                                        croppedBitmap = cropBitmapByRelativeRect(
+                                        val cropped = cropBitmapByRelativeRect(
                                             bmp, relLeft, relTop, relRight, relBottom
                                         )
+                                        croppedBitmap = cropped
+                                        viewModel.verifyCropped(cropped)
                                     }
                                 }
                             }
@@ -231,7 +275,7 @@ fun ScanScreen(
             }
         }
 
-        // Quick white flash overlay when capturing
+        // Flash overlay
         if (flashOn) {
             Box(
                 Modifier

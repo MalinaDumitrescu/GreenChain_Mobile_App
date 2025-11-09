@@ -6,6 +6,9 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody
+import java.io.ByteArrayOutputStream
 import kotlin.math.max
 import kotlin.math.min
 
@@ -38,4 +41,12 @@ fun cropBitmapByRelativeRect(
     val b = max(t + 1, min(bottom, src.height))
 
     return Bitmap.createBitmap(src, l, t, r - l, b - t)
+}
+
+/** Convert a Bitmap to JPEG RequestBody for RoboFlow upload. */
+fun Bitmap.toJpegRequestBody(quality: Int = 90): RequestBody {
+    val stream = ByteArrayOutputStream()
+    this.compress(Bitmap.CompressFormat.JPEG, quality, stream)
+    val bytes = stream.toByteArray()
+    return RequestBody.create("image/jpeg".toMediaType(), bytes)
 }
