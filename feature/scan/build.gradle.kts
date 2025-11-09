@@ -12,6 +12,13 @@ android {
 
     defaultConfig {
         minSdk = 24
+
+        // Read from gradle properties / local.properties
+        val apiKey = (project.findProperty("ROBOFLOW_API_KEY") as String? ?: "")
+        val modelId = (project.findProperty("ROBOFLOW_MODEL_ID") as String? ?: "")
+
+        buildConfigField("String", "ROBOFLOW_API_KEY", "\"$apiKey\"")
+        buildConfigField("String", "ROBOFLOW_MODEL_ID", "\"$modelId\"")
     }
 
     compileOptions {
@@ -22,7 +29,10 @@ android {
         jvmTarget = "17"
     }
 
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -46,6 +56,18 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
+    implementation(libs.hilt.navigation.compose) // ⬅️ add this
+
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+
+    // 🔌 Networking for RoboFlow (from your version catalog)
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.moshi)
+    implementation(libs.okhttp.core) // Added this
+    implementation(libs.okhttp.logging)
+    implementation(libs.moshi.core)
+    implementation(libs.moshi.kotlin)
+    ksp(libs.moshi.codegen)                        // ✅ CHANGED: use moshi-codegen alias
 }
