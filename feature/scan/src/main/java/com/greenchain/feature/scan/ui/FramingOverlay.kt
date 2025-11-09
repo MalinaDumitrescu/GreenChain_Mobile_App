@@ -9,12 +9,8 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.Stroke // ✅ important import
+import androidx.compose.ui.graphics.drawscope.Stroke
 
-/**
- * Draws a translucent mask with a hollow square and a dashed border.
- * `relLeft`..`relRight` / `relTop`..`relBottom` are in 0f..1f relative to this view.
- */
 @Composable
 fun FramingOverlay(
     relLeft: Float,
@@ -31,33 +27,32 @@ fun FramingOverlay(
 
         val dim = Color(0x99000000)
 
-        // Dim everything outside the square (four rectangles)
-        // Top band
+        // Top
         drawRect(
             color = dim,
             topLeft = Offset(0f, 0f),
-            size = Size(width = size.width, height = rect.top)
+            size = Size(size.width, rect.top)
         )
-        // Left band
+        // Left
         drawRect(
             color = dim,
             topLeft = Offset(0f, rect.top),
-            size = Size(width = rect.left, height = rect.height)
+            size = Size(rect.left, rect.height)
         )
-        // Right band
+        // Right
         drawRect(
             color = dim,
             topLeft = Offset(rect.right, rect.top),
-            size = Size(width = size.width - rect.right, height = rect.height)
+            size = Size(size.width - rect.right, rect.height)
         )
-        // Bottom band
+        // Bottom
         drawRect(
             color = dim,
             topLeft = Offset(0f, rect.bottom),
-            size = Size(width = size.width, height = size.height - rect.bottom)
+            size = Size(size.width, size.height - rect.bottom)
         )
 
-        // Dashed white border around the square
+        // Border
         drawRect(
             color = Color.White,
             topLeft = Offset(rect.left, rect.top),
