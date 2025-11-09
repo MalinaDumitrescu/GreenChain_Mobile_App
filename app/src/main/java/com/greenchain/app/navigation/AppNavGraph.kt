@@ -9,6 +9,8 @@ import com.greenchain.feature.scan.ui.ScanScreen
 // dacă AuthScreen e în modul feature/auth:
 import com.greenchain.feature.auth.AuthScreen
 
+import com.greenchain.feature.map.MapScreen
+
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
