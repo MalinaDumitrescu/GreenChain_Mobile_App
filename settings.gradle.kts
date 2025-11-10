@@ -26,10 +26,12 @@ include(
     ":feature:quests",
     ":feature:map",
     ":feature:notifications",
-    ":feature:auth"
+    ":feature:auth",
+    ":feature:profile"
 )
 
 project(":core:model").projectDir = file("core/model")
 project(":core:data").projectDir = file("core/data")
 project(":core:network").projectDir = file("core/network")
 project(":core:database").projectDir = file("core/database")
+project(":feature:profile").projectDir = file("feature/profile")
