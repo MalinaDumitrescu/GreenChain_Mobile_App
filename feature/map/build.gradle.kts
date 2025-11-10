@@ -31,6 +31,7 @@ dependencies {
     implementation(libs.compose.foundation)
     implementation(libs.compose.runtime)
     implementation(libs.compose.material3)
+    implementation(libs.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
 
     // Hilt
@@ -41,6 +42,7 @@ dependencies {
     // Maps - Core dependencies for the map screen
     implementation(libs.maps.compose)
     implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

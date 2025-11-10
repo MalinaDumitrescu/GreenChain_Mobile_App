@@ -24,12 +24,18 @@ class RecyclingPointDataSource @Inject constructor(
             val geometry = feature.getJSONObject("geometry")
             if (geometry.getString("type") == "Point") {
                 val coordinates = geometry.getJSONArray("coordinates")
+                val longitude = coordinates.getDouble(0)
+                val latitude = coordinates.getDouble(1)
+
+                val properties = feature.optJSONObject("properties")
+                val name = properties?.optString("name", "$latitude, $longitude") ?: "$latitude, $longitude"
+
                 points.add(
                     RecyclingPoint(
                         id = UUID.randomUUID().toString(),
-                        name = "Recycling Point", // Or get from properties if available
-                        longitude = coordinates.getDouble(0),
-                        latitude = coordinates.getDouble(1)
+                        name = name,
+                        longitude = longitude,
+                        latitude = latitude
                     )
                 )
             }
