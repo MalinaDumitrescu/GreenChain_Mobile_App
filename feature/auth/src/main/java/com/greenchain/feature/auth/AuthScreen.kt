@@ -17,8 +17,11 @@ fun AuthScreen(
     val ui by vm.ui.collectAsState()
 
     if (ui.success) {
-        // navigăm imediat în app
-        LaunchedEffect(Unit) { onSuccess() }
+
+        LaunchedEffect(ui.success) {
+            onSuccess()
+            vm.onNavigated()
+        }
     }
 
     Column(

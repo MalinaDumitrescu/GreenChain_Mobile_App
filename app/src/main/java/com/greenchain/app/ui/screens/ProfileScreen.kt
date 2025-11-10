@@ -25,6 +25,7 @@ import com.greenchain.app.ui.theme.GreenPrimary
 import com.greenchain.app.ui.theme.BrownLight
 import com.greenchain.app.ui.theme.BrownDark
 import androidx.compose.ui.graphics.Color
+import com.greenchain.app.navigation.Routes
 
 
 @Composable
@@ -38,7 +39,7 @@ fun ProfileScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Background      // fundal crem-verzui original
+        color = Background
     ) {
         when {
             state.isLoading -> {
@@ -69,27 +70,19 @@ fun ProfileScreen(
                     onEditClick = { /* TODO */ },
                     onLogoutClick = {
                         viewModel.logout()
-                        navController.popBackStack()
+
+                        navController.navigate(Routes.Auth.route) {
+                            popUpTo(Routes.Home.route) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     },
                     onHelpClick = onHelpClick
                 )
             }
-
-            else -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "No profile data available",
-                        textAlign = TextAlign.Center,
-                        color = BrownDark
-                    )
-                }
-            }
         }
     }
 }
+
 
 @Composable
 private fun ProfileContent(
@@ -122,7 +115,7 @@ private fun ProfileContent(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
-                containerColor = GreenPrimary   // verde pal pentru carduri
+                containerColor = GreenPrimary
             ),
             elevation = CardDefaults.cardElevation(0.dp)
         ) {
@@ -277,6 +270,7 @@ private fun ProfileContent(
                 Text("Logout", fontWeight = FontWeight.Medium)
             }
         }
+
 
         Spacer(Modifier.height(16.dp))
 
