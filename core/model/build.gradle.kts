@@ -32,7 +32,8 @@ android {
 }
 
 dependencies {
-    // Keep model pure; no deps needed now.
+    // The model is now pure Kotlin, with no external dependencies.
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
