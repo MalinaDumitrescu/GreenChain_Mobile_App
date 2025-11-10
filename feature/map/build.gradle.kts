@@ -24,6 +24,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:model"))
+
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.foundation)
@@ -36,10 +38,8 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
-    // Maps
+    // Maps - Core dependencies for the map screen
     implementation(libs.maps.compose)
-    implementation(libs.maps.compose.utils)
-    implementation(libs.maps.compose.widgets)
     implementation(libs.play.services.maps)
 
     testImplementation(libs.junit)

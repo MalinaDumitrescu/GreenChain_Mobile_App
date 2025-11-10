@@ -84,8 +84,9 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
 
 
-    // Google Maps (if needed)
+    // Google Maps
     implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
 
     // Hilt (KSP)
     implementation(libs.hilt.android)   // <-- CORRECT accessor
