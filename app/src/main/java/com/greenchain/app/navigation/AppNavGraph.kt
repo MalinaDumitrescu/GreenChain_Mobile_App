@@ -1,6 +1,7 @@
 package com.greenchain.app.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -9,6 +10,10 @@ import com.greenchain.feature.scan.ui.ScanScreen
 // dacă AuthScreen e în modul feature/auth:
 import com.greenchain.feature.auth.AuthScreen
 import com.greenchain.feature.map.MapScreen
+//import com.greenchain.feature.profile.ProfileScreen
+import com.greenchain.feature.profile.ProfileViewModel
+import com.greenchain.app.ui.screens.ProfileScreen
+
 
 
 
@@ -61,7 +66,12 @@ fun AppNavGraph(
         }
 
         composable(Routes.Profile.route) {
-            ProfileScreen()
+            val vm: ProfileViewModel = hiltViewModel()
+            ProfileScreen(
+                navController = navController,
+                viewModel = vm
+            )
         }
+
     }
 }
