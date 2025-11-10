@@ -46,17 +46,17 @@ class ProfileViewModel @Inject constructor(
             .addOnSuccessListener { doc ->
                 if (doc != null && doc.exists()) {
 
-                    // Mapăm documentul la UserProfile (folosește default-urile din data class)
+
                     val rawProfile = doc.toObject(UserProfile::class.java)
                     android.util.Log.d("ProfileViewModel", "Loaded photoUrl = ${rawProfile?.photoUrl}")
 
 
                     if (rawProfile != null) {
-                        // Asigurăm consistența cu auth + doc id
+
                         val finalProfile = rawProfile.copy(
                             uid = rawProfile.uid.ifBlank { currentUser.uid },
                             email = rawProfile.email.ifBlank { currentUser.email.orEmpty() },
-                            // dacă vrei să preiei displayName din Firebase când nu ai name în DB:
+
                             name = rawProfile.name.ifBlank { currentUser.displayName.orEmpty() }
                         )
 
@@ -72,7 +72,6 @@ class ProfileViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    // fallback dacă nu există document: construim profil minimal
                     val fallback = UserProfile(
                         uid = currentUser.uid,
                         email = currentUser.email.orEmpty(),
@@ -94,11 +93,15 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun logout() {
+        uiState = uiState.copy(isLoading = true)
+
         auth.signOut()
+
         uiState = UiState(
-            isLoading = false,
+            isLoading = true,
             error = null,
             userProfile = null
         )
     }
+
 }
