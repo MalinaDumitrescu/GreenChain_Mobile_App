@@ -1,6 +1,8 @@
 package com.greenchain.feature.map.di
 
 import android.content.Context
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.greenchain.feature.map.data.RecyclingPointDataSource
 import com.greenchain.feature.map.data.RecyclingPointRepository
 import dagger.Module
@@ -24,5 +26,11 @@ object MapModule {
     @Singleton
     fun provideRecyclingPointRepository(dataSource: RecyclingPointDataSource): RecyclingPointRepository {
         return RecyclingPointRepository(dataSource)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFusedLocationProviderClient(@ApplicationContext context: Context): FusedLocationProviderClient {
+        return LocationServices.getFusedLocationProviderClient(context)
     }
 }
