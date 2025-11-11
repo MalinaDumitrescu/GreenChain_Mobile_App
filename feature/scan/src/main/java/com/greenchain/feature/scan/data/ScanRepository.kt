@@ -1,38 +1,25 @@
 package com.greenchain.feature.scan.data
 
 import android.graphics.Bitmap
-import com.greenchain.feature.scan.di.RoboFlowApiKey
-import com.greenchain.feature.scan.di.RoboFlowModelId
-import com.greenchain.feature.scan.util.toJpegRequestBody
-import okhttp3.MultipartBody
+import android.util.Log
+import com.greenchain.feature.scan.ai.SgrLogoDetector
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class ScanRepository @Inject constructor(
-    private val api: RoboFlowApi,
-    @RoboFlowModelId private val modelId: String,
-    @RoboFlowApiKey private val apiKey: String
+    private val detector: SgrLogoDetector
 ) {
 
-    /** Returns true if an `sgr_logo` is detected with confidence >= [minConfidence]. */
     suspend fun verifySgrLogo(
         cropped: Bitmap,
-        minConfidence: Float = 0.6f
-    ): Boolean {
-        val body = cropped.toJpegRequestBody()
-        val part = MultipartBody.Part.createFormData(
-            name = "file",
-            filename = "scan.jpg",
-            body = body
-        )
-
-        val response = api.detectLogo(
-            modelId = modelId,
-            file = part,
-            apiKey = apiKey
-        )
-
-        return response.predictions.any {
-            it.clazz == "sgr_logo" && it.confidence >= minConfidence
-        }
+        minConfidence: Float = 0.5f
+    ): Boolean = withContext(Dispatchers.Default) {
+        Log.d("ScanRepo", "verifySgrLogo() called")
+        val result = detector.hasSgrLogo(cropped, minConfidence)
+        Log.d("ScanRepo", "verifySgrLogo() detector result = $result")
+        result
     }
 }

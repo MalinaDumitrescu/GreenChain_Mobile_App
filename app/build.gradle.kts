@@ -82,6 +82,7 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     debugImplementation(libs.compose.ui.tooling)
     implementation("com.google.android.material:material:1.12.0")
+    implementation("org.tensorflow:tensorflow-lite:2.14.0")
 
 
     // Google Maps

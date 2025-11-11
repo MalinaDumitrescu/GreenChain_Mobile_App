@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.util.Log
+
 
 @HiltViewModel
 class ScanViewModel @Inject constructor(
@@ -20,19 +22,27 @@ class ScanViewModel @Inject constructor(
 
     private val _isValid = MutableStateFlow<Boolean?>(null)
     val isValid: StateFlow<Boolean?> = _isValid
-
     fun verifyCropped(cropped: Bitmap) {
+        Log.d("ScanVM", "verifyCropped() called, size=${cropped.width}x${cropped.height}")
+
         _isVerifying.value = true
         _isValid.value = null
 
         viewModelScope.launch {
             val ok = runCatching { repo.verifySgrLogo(cropped) }
+                .onFailure { e ->
+                    Log.e("ScanVM", "Error in verifySgrLogo", e)
+                }
                 .getOrElse { false }
 
+            Log.d("ScanVM", "verifyCropped() result = $ok")
             _isValid.value = ok
             _isVerifying.value = false
         }
     }
+
+
+
 
     fun reset() {
         _isValid.value = null

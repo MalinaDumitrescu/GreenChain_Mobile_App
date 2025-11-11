@@ -14,11 +14,11 @@ android {
         minSdk = 24
 
         // Read from gradle properties / local.properties
-        val apiKey = (project.findProperty("ROBOFLOW_API_KEY") as String? ?: "")
-        val modelId = (project.findProperty("ROBOFLOW_MODEL_ID") as String? ?: "")
-
-        buildConfigField("String", "ROBOFLOW_API_KEY", "\"$apiKey\"")
-        buildConfigField("String", "ROBOFLOW_MODEL_ID", "\"$modelId\"")
+//        val apiKey = (project.findProperty("ROBOFLOW_API_KEY") as String? ?: "")
+//        val modelId = (project.findProperty("ROBOFLOW_MODEL_ID") as String? ?: "")
+//
+//        buildConfigField("String", "ROBOFLOW_API_KEY", "\"$apiKey\"")
+//        buildConfigField("String", "ROBOFLOW_MODEL_ID", "\"$modelId\"")
     }
 
     compileOptions {
@@ -32,6 +32,11 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    sourceSets {
+        getByName("main") {
+            assets.srcDirs("src/main/assets")
+        }
     }
 }
 
@@ -51,6 +56,7 @@ dependencies {
     implementation(libs.camerax.camera2)
     implementation(libs.camerax.lifecycle)
     implementation(libs.camerax.view)
+    implementation("org.tensorflow:tensorflow-lite:2.14.0")
 
     // Hilt
     implementation(libs.hilt.android)

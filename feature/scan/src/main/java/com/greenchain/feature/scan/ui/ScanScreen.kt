@@ -236,26 +236,25 @@ fun ScanScreen(
                         object : ImageCapture.OnImageSavedCallback {
                             override fun onError(exc: ImageCaptureException) {
                                 isCapturing = false
-                                // TODO: show error if needed
                             }
 
                             override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                                 isCapturing = false
-                                output.savedUri?.let { uri ->
-                                    onCaptured(uri) // if upper layers care
-
+                                val uri = output.savedUri
+                                if (uri != null) {
+                                    onCaptured(uri)
                                     scope.launch {
                                         val bmp = loadBitmap(context, uri)
-                                        val cropped = cropBitmapByRelativeRect(
-                                            bmp, relLeft, relTop, relRight, relBottom
-                                        )
+                                        val cropped = cropBitmapByRelativeRect(bmp, relLeft, relTop, relRight, relBottom)
                                         croppedBitmap = cropped
                                         viewModel.verifyCropped(cropped)
+                                        context.contentResolver.delete(uri, null, null)
                                     }
                                 }
                             }
                         }
                     )
+
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
