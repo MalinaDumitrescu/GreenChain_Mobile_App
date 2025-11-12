@@ -25,6 +25,9 @@ captures/
 **/build/kotlin/
 **/build/tmp/
 **/build/intermediates/
+ **/cacheable/
+ **/caches-jvm/
+ **/local-state/
 
 # OS
 .DS_Store
