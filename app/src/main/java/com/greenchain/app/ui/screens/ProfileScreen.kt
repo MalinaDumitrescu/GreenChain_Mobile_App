@@ -144,6 +144,15 @@ private fun ProfileContent(
                     color = BrownDark
                 )
 
+                if (profile.username.isNotBlank()) {
+                    Text(
+                        text = "@${profile.username}",
+                        fontSize = 16.sp,
+                        color = BrownLight,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
                 if (profile.email.isNotBlank()) {
                     Text(
                         text = profile.email,

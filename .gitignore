@@ -1,5 +1,6 @@
 # Gradle / builds
 .gradle/
+build/
 **/build/
 .cxx/
 .externalNativeBuild/
@@ -21,6 +22,9 @@ captures/
 # Kotlin/Compose
 .kotlinc/
 .ksp/
+**/build/kotlin/
+**/build/tmp/
+**/build/intermediates/
 
 # OS
 .DS_Store
