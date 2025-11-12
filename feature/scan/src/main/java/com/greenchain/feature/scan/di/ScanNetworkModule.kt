@@ -1,3 +1,4 @@
+/*
 package com.greenchain.feature.scan.di
 
 import com.greenchain.feature.scan.BuildConfig
@@ -73,3 +74,4 @@ object ScanNetworkModule {
     @RoboFlowApiKey
     fun provideRoboFlowApiKey(): String = BuildConfig.ROBOFLOW_API_KEY
 }
+*/
