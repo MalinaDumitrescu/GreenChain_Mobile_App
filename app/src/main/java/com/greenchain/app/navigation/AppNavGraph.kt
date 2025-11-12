@@ -13,12 +13,14 @@ import com.greenchain.feature.map.MapScreen
 //import com.greenchain.feature.profile.ProfileScreen
 import com.greenchain.feature.profile.ProfileViewModel
 import com.greenchain.app.ui.screens.ProfileScreen
+import com.google.firebase.auth.FirebaseAuth
 
 
 
 
 @Composable
 fun AppNavGraph(
+    auth: FirebaseAuth,
     navController: NavHostController,
     startDestination: String
 ) {
@@ -27,7 +29,8 @@ fun AppNavGraph(
             OnboardingScreen(
                 onContinue = {
                     // după onboarding mergem la Auth (dacă vrei direct Home, schimbă ruta aici)
-                    navController.navigate(Routes.Auth.route) {
+                    val destination = if (auth.currentUser != null) Routes.Home.route else Routes.Auth.route
+                    navController.navigate(destination) {
                         popUpTo(Routes.Onboarding.route) { inclusive = true }
                     }
                 }
