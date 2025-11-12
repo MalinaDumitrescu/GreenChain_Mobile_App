@@ -58,13 +58,7 @@ class MainActivity : ComponentActivity() {
                 val backStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = backStackEntry?.destination?.route ?: Routes.Home.route
 
-                // TODO: replace with real DataStore check
-                val onboardingDone = false
-                val start = when {
-                    !onboardingDone -> Routes.Onboarding
-                    auth.currentUser == null -> Routes.Auth
-                    else -> Routes.Home
-                }
+                val start = Routes.Onboarding
 
                 val topLevel = listOf(
                     Routes.Home,
@@ -95,6 +89,7 @@ class MainActivity : ComponentActivity() {
                 ) { padding ->
                     Box(Modifier.padding(padding)) {
                         AppNavGraph(
+                            auth = auth,
                             navController = navController,
                             startDestination = start.route
                         )
