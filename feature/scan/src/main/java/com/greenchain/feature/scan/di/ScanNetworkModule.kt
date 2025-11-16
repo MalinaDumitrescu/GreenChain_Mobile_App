@@ -1,4 +1,3 @@
-/*
 package com.greenchain.feature.scan.di
 
 import com.greenchain.feature.scan.BuildConfig
@@ -22,8 +21,6 @@ annotation class RoboFlowModelId
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class RoboFlowApiKey
-
-
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -74,4 +71,3 @@ object ScanNetworkModule {
     @RoboFlowApiKey
     fun provideRoboFlowApiKey(): String = BuildConfig.ROBOFLOW_API_KEY
 }
-*/
