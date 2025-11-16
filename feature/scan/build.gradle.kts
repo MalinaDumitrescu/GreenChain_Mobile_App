@@ -14,11 +14,11 @@ android {
         minSdk = 24
 
         // Read from gradle properties / local.properties
-//        val apiKey = (project.findProperty("ROBOFLOW_API_KEY") as String? ?: "")
-//        val modelId = (project.findProperty("ROBOFLOW_MODEL_ID") as String? ?: "")
-//
-//        buildConfigField("String", "ROBOFLOW_API_KEY", "\"$apiKey\"")
-//        buildConfigField("String", "ROBOFLOW_MODEL_ID", "\"$modelId\"")
+        val apiKey = (project.findProperty("ROBOFLOW_API_KEY") as String? ?: "").ifBlank { "dummy_api_key" }
+        val modelId = (project.findProperty("ROBOFLOW_MODEL_ID") as String? ?: "").ifBlank { "dummy_model_id" }
+
+        buildConfigField("String", "ROBOFLOW_API_KEY", "\"$apiKey\"")
+        buildConfigField("String", "ROBOFLOW_MODEL_ID", "\"$modelId\"")
     }
 
     compileOptions {
@@ -42,6 +42,15 @@ android {
 
 dependencies {
     implementation(project(":core:model"))
+    implementation(project(":feature:profile"))
+
+    // Guava
+    implementation("com.google.guava:guava:32.0.1-android")
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
 
     // Compose
     implementation(platform(libs.compose.bom))
@@ -61,9 +70,7 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-
-    implementation(libs.hilt.navigation.compose) // ⬅️ add this
-
+    implementation(libs.hilt.navigation.compose)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
@@ -71,9 +78,9 @@ dependencies {
     // 🔌 Networking for RoboFlow (from your version catalog)
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.moshi)
-    implementation(libs.okhttp.core) // Added this
+    implementation(libs.okhttp.core)
     implementation(libs.okhttp.logging)
     implementation(libs.moshi.core)
     implementation(libs.moshi.kotlin)
-    ksp(libs.moshi.codegen)                        // ✅ CHANGED: use moshi-codegen alias
+    ksp(libs.moshi.codegen)
 }
