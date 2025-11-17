@@ -2,6 +2,7 @@ package com.greenchain.feature.scan.ui
 
 import android.Manifest
 import android.content.ContentValues
+import android.content.Context
 import android.graphics.Bitmap
 import android.media.AudioManager
 import android.media.MediaActionSound
@@ -27,11 +28,11 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.greenchain.feature.scan.util.cropBitmapByRelativeRect
 import com.greenchain.feature.scan.util.loadBitmap
 import kotlinx.coroutines.delay
@@ -164,7 +165,7 @@ fun ScanScreen(
                             val cameraProvider = cameraProviderFuture.get()
 
                             val preview = Preview.Builder().build().also {
-                                it.setSurfaceProvider(previewView.surfaceProvider)
+                                it.surfaceProvider = previewView.surfaceProvider
                             }
 
                             imageCapture = ImageCapture.Builder()
