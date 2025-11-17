@@ -3,6 +3,7 @@ package com.greenchain.feature.scan.ui
 import android.Manifest
 import android.content.ContentValues
 import android.graphics.Bitmap
+import android.media.AudioManager
 import android.media.MediaActionSound
 import android.net.Uri
 import android.provider.MediaStore
@@ -77,12 +78,15 @@ fun ScanScreen(
     val haptics = LocalHapticFeedback.current
     var flashOn by remember { mutableStateOf(false) }
     val shutterSound = remember { MediaActionSound().apply { load(MediaActionSound.SHUTTER_CLICK) } }
+    val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     DisposableEffect(Unit) {
         onDispose { shutterSound.release() }
     }
     fun triggerShutterFeedback() {
         flashOn = true
-        shutterSound.play(MediaActionSound.SHUTTER_CLICK)
+        if (audioManager.ringerMode == AudioManager.RINGER_MODE_NORMAL) {
+            shutterSound.play(MediaActionSound.SHUTTER_CLICK)
+        }
         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         scope.launch {
             delay(120)

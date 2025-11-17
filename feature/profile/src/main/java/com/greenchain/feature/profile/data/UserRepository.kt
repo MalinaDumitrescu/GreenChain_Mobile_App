@@ -13,7 +13,7 @@ class UserRepository(
     private fun normalize(username: String): String {
         return username.trim().lowercase().replace(Regex("[^a-z0-9._-]"), "")
     }
-
+// todo malina
     /** Verifică dacă username-ul e liber */
     suspend fun isUsernameAvailable(username: String): Boolean {
         val norm = normalize(username)
