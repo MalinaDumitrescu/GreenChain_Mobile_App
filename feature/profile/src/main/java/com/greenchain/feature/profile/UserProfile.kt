@@ -10,7 +10,8 @@ data class UserProfile(
     val description: String = "",
     val photoUrl: String = "",
     val visibility: String = "public",
-    val friends: List<String> = emptyList()
+    val friends: List<String> = emptyList(),
+    val friendRequests: List<String> = emptyList() // Lista de UID-uri care au trimis cerere
 ) {
     val displayName: String
         get() = when {
