@@ -13,7 +13,7 @@ class LeaderboardRepository(
 ) {
     fun getLeaderboard(): Flow<List<UserProfile>> {
         return firestore.collection("users")
-            .orderBy("points", Query.Direction.DESCENDING)
+            .orderBy("bottleCount", Query.Direction.DESCENDING) // Sort by Recycled Bottles
             .limit(100)
             .snapshots()
             .map { it.toObjects<UserProfile>() }
