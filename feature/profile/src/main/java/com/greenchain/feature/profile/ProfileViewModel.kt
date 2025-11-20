@@ -215,4 +215,75 @@ class ProfileViewModel @Inject constructor(
             }
         }
     }
+
+    // Salvează tot profilul (name, username, description, photoUrl)
+    fun saveProfile(
+        name: String,
+        username: String,
+        description: String,
+        photoUrl: String? // null = păstrăm ce era
+    ) {
+        val current = auth.currentUser ?: return
+        val currentProfile = uiState.userProfile ?: return
+
+        val updated = currentProfile.copy(
+            name = name.trim(),
+            username = username.trim(),
+            description = description.trim(),
+            photoUrl = photoUrl ?: currentProfile.photoUrl
+        )
+
+        uiState = uiState.copy(isLoading = true, error = null)
+
+        viewModelScope.launch {
+            val result = runCatching { userRepo.saveUserProfile(updated) }
+            uiState = if (result.isSuccess) {
+                uiState.copy(
+                    isLoading = false,
+                    userProfile = updated,      // 🔥 ProfileScreen se actualizează imediat
+                    username = updated.username
+                )
+            } else {
+                uiState.copy(
+                    isLoading = false,
+                    error = result.exceptionOrNull()?.localizedMessage
+                )
+            }
+        }
+    }
+
+    // Șterge poza de profil (din Storage + din profil) și actualizează UI
+    fun removeProfilePhoto() {
+        val current = auth.currentUser ?: return
+        val profile = uiState.userProfile ?: return
+
+        if (profile.photoUrl.isBlank()) return  // nu are ce să șteargă
+
+        uiState = uiState.copy(isLoading = true, error = null)
+
+        viewModelScope.launch {
+            try {
+                // apel la repo -> șterge fișierul și resetează photoUrl în Firestore
+                userRepo.deleteProfilePhoto(current.uid)
+
+                // actualizăm și UI-ul local
+                val updated = profile.copy(photoUrl = "")
+                uiState = uiState.copy(
+                    isLoading = false,
+                    userProfile = updated
+                )
+            } catch (e: Exception) {
+                uiState = uiState.copy(
+                    isLoading = false,
+                    error = e.localizedMessage ?: "Failed to remove photo."
+                )
+            }
+        }
+    }
+    fun refreshProfile() {
+        loadUserProfile()
+    }
+
+
+
 }

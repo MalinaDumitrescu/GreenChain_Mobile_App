@@ -13,6 +13,8 @@ import com.greenchain.feature.map.MapScreen
 //import com.greenchain.feature.profile.ProfileScreen
 import com.greenchain.feature.profile.ProfileViewModel
 import com.greenchain.app.ui.screens.ProfileScreen
+import com.greenchain.app.ui.screens.EditProfileScreen
+import com.greenchain.feature.profile.EditProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -75,6 +77,13 @@ fun AppNavGraph(
                 viewModel = vm
             )
         }
+
+        composable(Routes.EditProfile.route) {
+            EditProfileScreen(
+                navController = navController
+            )
+        }
+
 
     }
 }

@@ -2,6 +2,7 @@ package com.greenchain.feature.profile.di
 
 import com.greenchain.feature.profile.data.UserRepository
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,7 +15,10 @@ object ProfileModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(firestore: FirebaseFirestore): UserRepository {
-        return UserRepository(firestore)
+    fun provideUserRepository(
+        firestore: FirebaseFirestore,
+        storage: FirebaseStorage
+    ): UserRepository {
+        return UserRepository(firestore, storage)
     }
 }
