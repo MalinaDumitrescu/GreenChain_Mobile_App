@@ -1,13 +1,16 @@
 package com.greenchain.feature.profile.data
 
+import android.net.Uri
 import com.greenchain.feature.profile.UserProfile
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldPath
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 
 class UserRepository(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val storage: FirebaseStorage
 ) {
     private val users = firestore.collection("users")
     private val usernames = firestore.collection("usernames")
@@ -139,4 +142,27 @@ class UserRepository(
             ))
         }
     }
+
+    private fun profilePhotoRef(uid: String) =
+        storage.reference.child("profilePictures/$uid")
+
+    /** Urcă o poză de profil în Firebase Storage și întoarce download URL-ul. */
+    suspend fun uploadProfilePhoto(uid: String, imageUri: Uri): String {
+        val ref = storage.reference.child("profilePictures/$uid")
+        ref.putFile(imageUri).await()
+        val downloadUri = ref.downloadUrl.await()
+        return downloadUri.toString()
+    }
+
+    /** Update la profil – practic doar delegă la saveUserProfile */
+    suspend fun updateUserProfile(profile: UserProfile) {
+        saveUserProfile(profile)
+    }
+
+    suspend fun deleteProfilePhoto(uid: String) {
+        val ref = storage.reference.child("profilePictures/$uid")
+        runCatching { ref.delete().await() } // dacă nu există, ignorăm eroarea
+        users.document(uid).update("photoUrl", "").await()
+    }
+
 }

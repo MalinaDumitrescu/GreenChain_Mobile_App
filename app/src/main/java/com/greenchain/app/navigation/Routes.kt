@@ -11,7 +11,9 @@ sealed class Routes(
     data object Scan        : Routes("scan", "Scan")
     data object Leaderboard : Routes("leaderboard", "Leaderboard")
     data object Profile     : Routes("profile", "Profile")
-    
+
+    data object EditProfile : Routes("edit_profile", "Edit Profile")
+
     companion object {
         val bottomBar = listOf(Home, Map, Scan, Leaderboard, Profile)
     }

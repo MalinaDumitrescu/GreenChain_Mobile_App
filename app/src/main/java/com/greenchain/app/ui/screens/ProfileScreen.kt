@@ -51,6 +51,16 @@ fun ProfileScreen(
     var showFriendsSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
+    val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    val profileUpdated = savedStateHandle?.get<Boolean>("profileUpdated") ?: false
+
+    LaunchedEffect(profileUpdated) {
+        if (profileUpdated) {
+            viewModel.refreshProfile()
+            savedStateHandle?.set("profileUpdated", false)
+        }
+    }
+
     // --- DIALOG: Add Friend ---
     if (showAddFriendDialog) {
         AlertDialog(
@@ -392,7 +402,7 @@ fun ProfileScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Button(
-                                onClick = { /* TODO: Edit profile */ },
+                                onClick = { navController.navigate(Routes.EditProfile.route) },
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(48.dp),
