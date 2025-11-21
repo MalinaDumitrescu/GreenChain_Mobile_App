@@ -438,12 +438,22 @@ fun ProfileScreen(
 
                         Spacer(Modifier.height(16.dp))
 
-                        Text(
-                            text = "Help & FAQ about your account",
-                            color = BrownLight,
-                            fontSize = 14.sp,
-                            modifier = Modifier.clickable { onHelpClick() }
-                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    navController.navigate(Routes.Help.route)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Help & FAQ about your account",
+                                color = BrownLight,
+                                fontSize = 14.sp
+                            )
+                        }
+
+
 
                         Spacer(Modifier.height(24.dp))
                     }

@@ -40,7 +40,8 @@ class ScanViewModel @Inject constructor(
                 .getOrElse { false }
 
             if (ok) {
-                addPointsToCurrentUser(1) // Award 1 point & bottle for a successful scan
+                addBottleToCurrentUser()
+                addPointsToCurrentUser(5)
             }
 
             Log.d("ScanVM", "verifyCropped() result = $ok")
@@ -52,11 +53,22 @@ class ScanViewModel @Inject constructor(
     private suspend fun addPointsToCurrentUser(amount: Int) {
         val uid = auth.currentUser?.uid ?: return
         val userProfile = userRepository.getUserProfile(uid)
+
         userProfile?.let {
-            // Update BOTH points and bottleCount
             val updatedProfile = it.copy(
-                points = it.points + amount,
-                bottleCount = it.bottleCount + amount
+                points = it.points + amount
+            )
+            userRepository.saveUserProfile(updatedProfile)
+        }
+    }
+
+    private suspend fun addBottleToCurrentUser() {
+        val uid = auth.currentUser?.uid ?: return
+        val userProfile = userRepository.getUserProfile(uid)
+
+        userProfile?.let {
+            val updatedProfile = it.copy(
+                bottleCount = it.bottleCount + 1
             )
             userRepository.saveUserProfile(updatedProfile)
         }

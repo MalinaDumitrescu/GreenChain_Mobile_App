@@ -14,6 +14,8 @@ sealed class Routes(
 
     data object EditProfile : Routes("edit_profile", "Edit Profile")
 
+    data object Help : Routes("help", "Help")
+
     companion object {
         val bottomBar = listOf(Home, Map, Scan, Leaderboard, Profile)
     }

@@ -11,7 +11,7 @@ data class UserProfile(
     val photoUrl: String = "",
     val visibility: String = "public",
     val friends: List<String> = emptyList(),
-    val friendRequests: List<String> = emptyList() // Lista de UID-uri care au trimis cerere
+    val friendRequests: List<String> = emptyList()
 ) {
     val displayName: String
         get() = when {
@@ -23,8 +23,9 @@ data class UserProfile(
     val ecoLevel: String
         get() = when (points) {
             in 0..49 -> "Eco Newbie"
-            in 50..149 -> "Eco Helper"
-            in 150..299 -> "Eco Hero"
-            else -> "Eco Legend"
+            in 50..99 -> "Eco Beginner"
+            in 100..149 -> "Eco Hero"
+            else -> "Eco Hero"
         }
+
 }

@@ -7,18 +7,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.greenchain.app.ui.screens.*
 import com.greenchain.feature.scan.ui.ScanScreen
-// dacă AuthScreen e în modul feature/auth:
 import com.greenchain.feature.auth.AuthScreen
 import com.greenchain.feature.map.MapScreen
-//import com.greenchain.feature.profile.ProfileScreen
 import com.greenchain.feature.profile.ProfileViewModel
 import com.greenchain.app.ui.screens.ProfileScreen
 import com.greenchain.app.ui.screens.EditProfileScreen
-import com.greenchain.feature.profile.EditProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
-
-
-
 
 @Composable
 fun AppNavGraph(
@@ -30,7 +24,6 @@ fun AppNavGraph(
         composable(Routes.Onboarding.route) {
             OnboardingScreen(
                 onContinue = {
-                    // după onboarding mergem la Auth (dacă vrei direct Home, schimbă ruta aici)
                     val destination = if (auth.currentUser != null) Routes.Home.route else Routes.Auth.route
                     navController.navigate(destination) {
                         popUpTo(Routes.Onboarding.route) { inclusive = true }
@@ -84,6 +77,10 @@ fun AppNavGraph(
             )
         }
 
-
+        composable(Routes.Help.route) {
+            HelpScreen(
+                navController = navController
+            )
+        }
     }
 }
