@@ -19,17 +19,12 @@ class UserRepository(
         return username.trim().lowercase().replace(Regex("[^a-z0-9._-]"), "")
     }
 
-    /** Verifică dacă username-ul e liber */
     suspend fun isUsernameAvailable(username: String): Boolean {
         val norm = normalize(username)
         val doc = usernames.document(norm).get().await()
         return !doc.exists()
     }
 
-    /**
-     * Creează sau actualizează un profil cu username unic.
-     * Rezervă username-ul în colecția "usernames" (doc ID = username)
-     */
     suspend fun saveUserProfile(profile: UserProfile) {
         val username = normalize(profile.username)
         require(username.isNotEmpty()) { "Username cannot be empty" }
@@ -38,24 +33,17 @@ class UserRepository(
             val usernameRef = usernames.document(username)
             val existing = tx.get(usernameRef)
 
-            // dacă username-ul e luat de altcineva → eroare
             if (existing.exists() && existing.getString("uid") != profile.uid) {
                 throw IllegalStateException("USERNAME_TAKEN")
             }
 
-            // rezervă username-ul pentru uid-ul curent
             tx.set(usernameRef, mapOf("uid" to profile.uid))
 
-            // salvează profilul complet în users/{uid}
             val userRef = users.document(profile.uid)
             tx.set(userRef, profile)
         }.await()
     }
 
-    /**
-     * Creează profilul inițial dacă nu există, doar în colecția 'users'.
-     * Nu setează username-ul în 'usernames', deci username-ul ar trebui să fie gol sau tratat ulterior.
-     */
     suspend fun createInitialProfileIfNeeded(profile: UserProfile) {
         val doc = users.document(profile.uid).get().await()
         if (!doc.exists()) {
@@ -63,51 +51,41 @@ class UserRepository(
         }
     }
 
-    /** Încarcă profilul utilizatorului curent */
     suspend fun getUserProfile(uid: String): UserProfile? {
         val doc = users.document(uid).get().await()
         return doc.toObject(UserProfile::class.java)
     }
 
-    /** Caută un utilizator după email */
     suspend fun getUserByEmail(email: String): UserProfile? {
         val snapshot = users.whereEqualTo("email", email).limit(1).get().await()
         return snapshot.documents.firstOrNull()?.toObject(UserProfile::class.java)
     }
 
-    /** Adaugă un prieten (unidirectional pentru moment: user -> friend) */
     suspend fun addFriend(userId: String, friendId: String) {
         users.document(userId).update("friends", FieldValue.arrayUnion(friendId)).await()
     }
 
-    /** Trimite o cerere de prietenie (adaugă UID-ul curent în friendRequests ale celuilalt) */
     suspend fun sendFriendRequest(fromUserId: String, toUserId: String) {
         users.document(toUserId).update("friendRequests", FieldValue.arrayUnion(fromUserId)).await()
     }
 
-    /** Acceptă o cerere de prietenie (tranzacție) */
     suspend fun acceptFriendRequest(currentUserId: String, friendId: String) {
         firestore.runTransaction { tx ->
             val currentUserRef = users.document(currentUserId)
             val friendRef = users.document(friendId)
 
-            // 1. Elimină friendId din friendRequests ale currentUserId
             tx.update(currentUserRef, "friendRequests", FieldValue.arrayRemove(friendId))
 
-            // 2. Adaugă friendId în friends ale currentUserId
             tx.update(currentUserRef, "friends", FieldValue.arrayUnion(friendId))
 
-            // 3. Adaugă currentUserId în friends ale friendId (prietenie bidirecțională)
             tx.update(friendRef, "friends", FieldValue.arrayUnion(currentUserId))
         }.await()
     }
 
-    /** Refuză (șterge) o cerere de prietenie */
     suspend fun declineFriendRequest(currentUserId: String, friendId: String) {
         users.document(currentUserId).update("friendRequests", FieldValue.arrayRemove(friendId)).await()
     }
 
-    /** Șterge un prieten (bidirecțional) */
     suspend fun removeFriend(userId: String, friendId: String) {
         firestore.runTransaction { tx ->
             val userRef = users.document(userId)
@@ -118,7 +96,6 @@ class UserRepository(
         }.await()
     }
 
-    /** Încarcă o listă de utilizatori pe baza listei de UID-uri */
     suspend fun getUsers(uids: List<String>): List<UserProfile> {
         if (uids.isEmpty()) return emptyList()
         val result = mutableListOf<UserProfile>()
@@ -129,10 +106,6 @@ class UserRepository(
         return result
     }
 
-    /**
-     * ADMIN: Resetează scorurile tuturor utilizatorilor la 0.
-     * Atenție: Aceasta este o operațiune distructivă!
-     */
     suspend fun resetAllUsersStats() {
         val snapshot = users.get().await()
         for (doc in snapshot.documents) {
@@ -146,7 +119,6 @@ class UserRepository(
     private fun profilePhotoRef(uid: String) =
         storage.reference.child("profilePictures/$uid")
 
-    /** Urcă o poză de profil în Firebase Storage și întoarce download URL-ul. */
     suspend fun uploadProfilePhoto(uid: String, imageUri: Uri): String {
         val ref = storage.reference.child("profilePictures/$uid")
         ref.putFile(imageUri).await()
@@ -154,15 +126,29 @@ class UserRepository(
         return downloadUri.toString()
     }
 
-    /** Update la profil – practic doar delegă la saveUserProfile */
     suspend fun updateUserProfile(profile: UserProfile) {
         saveUserProfile(profile)
     }
 
     suspend fun deleteProfilePhoto(uid: String) {
         val ref = storage.reference.child("profilePictures/$uid")
-        runCatching { ref.delete().await() } // dacă nu există, ignorăm eroarea
+        runCatching { ref.delete().await() }
         users.document(uid).update("photoUrl", "").await()
+    }
+
+    suspend fun addBottleAndPoints(uid: String) {
+        users.document(uid).update(
+            mapOf(
+                "bottleCount" to FieldValue.increment(1),
+                "points" to FieldValue.increment(5)
+            )
+        ).await()
+    }
+
+    suspend fun addQuestPoints(uid: String) {
+        users.document(uid)
+            .update("points", FieldValue.increment(15))
+            .await()
     }
 
 }
