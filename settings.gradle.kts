@@ -22,10 +22,8 @@ include(
     ":core:database",
     ":feature:scan",
     ":feature:leaderboard",
-    ":feature:social",
-    ":feature:quests",
+    ":feature:homepage",
     ":feature:map",
-    ":feature:notifications",
     ":feature:auth",
     ":feature:profile"
 )
