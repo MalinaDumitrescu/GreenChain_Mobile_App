@@ -117,10 +117,8 @@ dependencies {
 
     implementation(project(":feature:leaderboard"))
     implementation(project(":feature:map"))
-    implementation(project(":feature:notifications"))
-    implementation(project(":feature:quests"))
+    implementation(project(":feature:homepage"))
     implementation(project(":feature:scan"))
-    implementation(project(":feature:social"))
     implementation (project(":feature:auth"))
     implementation (project(":feature:profile"))
 }

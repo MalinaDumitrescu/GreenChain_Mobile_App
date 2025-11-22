@@ -6,13 +6,21 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.greenchain.app.ui.components.*
 import com.greenchain.app.ui.components.tokens.GCSpacing
+import com.greenchain.feature.homepage.HomeViewModel
+import com.greenchain.app.ui.components.QuoteCard
+
 
 @Composable
 fun HomeScreen(onContinue: () -> Unit = {}) {
+    val homeViewModel: HomeViewModel = hiltViewModel()
+    val quoteText by homeViewModel.quoteText.collectAsState()
     Surface(color = MaterialTheme.colorScheme.background) {
         Column {
             TopBar()
@@ -23,7 +31,11 @@ fun HomeScreen(onContinue: () -> Unit = {}) {
                 verticalArrangement = Arrangement.spacedBy(GCSpacing.md)
             ) {
                 item {
-                    QuoteCard()
+                    if (quoteText != null) {
+                        QuoteCard(quote = quoteText!!)
+                    } else {
+                        QuoteCard()
+                    }
                 }
                 item {
                     QuestCard(title = "Quest of the day", progress = 0.1f, onView = onContinue)
