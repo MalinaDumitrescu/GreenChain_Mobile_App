@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.greenchain.feature.profile"
+    namespace = "com.greenchain.feature.setup"
     compileSdk = 34
 
     defaultConfig {
@@ -42,9 +42,15 @@ android {
 
 dependencies {
     // Project dependencies
-    implementation(project(":core:model"))
     implementation(project(":core:data"))
-    implementation(project(":core:network"))
+    implementation(project(":feature:profile"))
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+
+    // Coil
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Compose
     implementation(platform(libs.compose.bom))
@@ -53,24 +59,16 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling)
     implementation(libs.compose.material3)
-    implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation("com.google.firebase:firebase-storage-ktx")
-
-    implementation("de.hdodenhof:circleimageview:3.1.0")
-
+    implementation(libs.compose.material.icons.extended)
 
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
-    // Firebase (optional)
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.firestore)
-
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
 
     // Tests
     testImplementation(libs.junit)

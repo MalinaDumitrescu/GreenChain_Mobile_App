@@ -121,4 +121,5 @@ dependencies {
     implementation(project(":feature:scan"))
     implementation (project(":feature:auth"))
     implementation (project(":feature:profile"))
+    implementation (project(":feature:setup"))
 }
