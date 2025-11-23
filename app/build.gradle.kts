@@ -123,4 +123,5 @@ dependencies {
     implementation(project(":feature:social"))
     implementation (project(":feature:auth"))
     implementation (project(":feature:profile"))
+    implementation (project(":feature:setup"))
 }

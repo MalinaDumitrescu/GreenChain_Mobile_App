@@ -6,6 +6,7 @@ sealed class Routes(
 ) {
     data object Onboarding  : Routes("onboarding", "Onboarding")
     data object Auth        : Routes("auth", "Auth")
+    data object Setup       : Routes("setup", "Setup")
     data object Home        : Routes("home", "Home")
     data object Map         : Routes("map", "Map")
     data object Scan        : Routes("scan", "Scan")

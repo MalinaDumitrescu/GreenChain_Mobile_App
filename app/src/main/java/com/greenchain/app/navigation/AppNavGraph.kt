@@ -12,6 +12,7 @@ import com.greenchain.feature.map.MapScreen
 import com.greenchain.feature.profile.ProfileViewModel
 import com.greenchain.app.ui.screens.ProfileScreen
 import com.greenchain.app.ui.screens.EditProfileScreen
+import com.greenchain.feature.setup.SetupScreen
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -35,8 +36,18 @@ fun AppNavGraph(
         composable(Routes.Auth.route) {
             AuthScreen(
                 onSuccess = {
-                    navController.navigate(Routes.Home.route) {
+                    navController.navigate(Routes.Setup.route) {
                         popUpTo(Routes.Auth.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.Setup.route) {
+            SetupScreen(
+                onSuccess = {
+                    navController.navigate(Routes.Home.route) {
+                        popUpTo(Routes.Setup.route) { inclusive = true }
                     }
                 }
             )
