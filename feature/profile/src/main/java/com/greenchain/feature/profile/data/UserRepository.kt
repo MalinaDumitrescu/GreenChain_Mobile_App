@@ -15,6 +15,21 @@ class UserRepository(
     private val users = firestore.collection("users")
     private val usernames = firestore.collection("usernames")
 
+    suspend fun searchUsersByUsername(query: String): List<UserProfile> {
+        if (query.isBlank()) {
+            return emptyList()
+        }
+        val normalizedQuery = normalize(query)
+        val snapshot = users
+            .whereGreaterThanOrEqualTo("username", normalizedQuery)
+            .whereLessThanOrEqualTo("username", normalizedQuery + '\uf8ff')
+            .orderBy("username")
+            .limit(20)
+            .get()
+            .await()
+        return snapshot.toObjects(UserProfile::class.java)
+    }
+
     private fun normalize(username: String): String {
         return username.trim().lowercase().replace(Regex("[^a-z0-9._-]"), "")
     }

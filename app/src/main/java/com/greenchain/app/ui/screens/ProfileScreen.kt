@@ -45,9 +45,7 @@ fun ProfileScreen(
     val state = viewModel.uiState
     val profile = state.userProfile
 
-    // State pentru Dialogul de Adăugare Prieten
     var showAddFriendDialog by remember { mutableStateOf(false) }
-    // State pentru Lista de Prieteni (BottomSheet)
     var showFriendsSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
 
@@ -61,48 +59,58 @@ fun ProfileScreen(
         }
     }
 
-    // --- DIALOG: Add Friend ---
     if (showAddFriendDialog) {
         AlertDialog(
             onDismissRequest = { showAddFriendDialog = false },
             title = { Text("Add Friend") },
             text = {
                 Column {
-                    Text("Enter friend's email to send a request:")
-                    Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
-                        value = state.friendEmailQuery,
-                        onValueChange = viewModel::onFriendEmailQueryChange,
-                        label = { Text("Email") },
-                        singleLine = true
+                        value = state.friendUsernameQuery,
+                        onValueChange = viewModel::onFriendUsernameQueryChange,
+                        label = { Text("Search by username") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    LazyColumn {
+                        items(state.searchResults) { user ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(text = user.displayName)
+                                Button(onClick = { viewModel.sendFriendRequestByUid(user.uid) }) {
+                                    Text("Add")
+                                }
+                            }
+                        }
+                    }
 
                     state.addFriendStatus?.let { status ->
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = status,
-                            color = if (status.contains("sent", true) || status.contains("success", true)) BrownLight else MaterialTheme.colorScheme.error,
+                            color = if (status.contains("sent", true)) BrownLight else MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = { viewModel.sendFriendRequest() },
-                    colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
-                ) {
-                    Text("Send Request")
-                }
-            },
-            dismissButton = {
                 TextButton(
                     onClick = { showAddFriendDialog = false },
                     colors = ButtonDefaults.textButtonColors(contentColor = BrownLight)
                 ) {
                     Text("Close")
                 }
-            }
+            },
+            dismissButton = {}
         )
     }
 

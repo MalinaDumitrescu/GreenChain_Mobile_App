@@ -23,6 +23,8 @@ class ProfileViewModel @Inject constructor(
         val userProfile: UserProfile? = null,
         val username: String = "",
         val friendEmailQuery: String = "",
+        val friendUsernameQuery: String = "",
+        val searchResults: List<UserProfile> = emptyList(),
         val addFriendStatus: String? = null,
         val friendsList: List<UserProfile> = emptyList(),
         val friendRequestsList: List<UserProfile> = emptyList()
@@ -59,22 +61,18 @@ class ProfileViewModel @Inject constructor(
                     profile = newProfile
                 }
 
-                // (Rollback: Am scos migrarea de aici)
-
                 val finalProfile = profile!!.copy(
                     uid = if (profile.uid.isBlank()) currentUser.uid else profile.uid,
                     email = if (profile.email.isBlank()) currentUser.email.orEmpty() else profile.email,
                     name = if (profile.name.isBlank()) currentUser.displayName.orEmpty() else profile.name
                 )
 
-                // Load Friends
                 val friendsDetails = if (finalProfile.friends.isNotEmpty()) {
                     runCatching { userRepo.getUsers(finalProfile.friends) }.getOrElse { emptyList() }
                 } else {
                     emptyList()
                 }
 
-                // Load Friend Requests
                 val requestsDetails = if (finalProfile.friendRequests.isNotEmpty()) {
                     runCatching { userRepo.getUsers(finalProfile.friendRequests) }.getOrElse { emptyList() }
                 } else {
@@ -116,10 +114,40 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    // --- Friend functionality ---
-
     fun onFriendEmailQueryChange(query: String) {
         uiState = uiState.copy(friendEmailQuery = query)
+    }
+
+    fun onFriendUsernameQueryChange(query: String) {
+        uiState = uiState.copy(friendUsernameQuery = query)
+        viewModelScope.launch {
+            if (query.length > 2) {
+                val results = userRepo.searchUsersByUsername(query)
+                uiState = uiState.copy(searchResults = results, addFriendStatus = null)
+            } else {
+                uiState = uiState.copy(searchResults = emptyList())
+            }
+        }
+    }
+
+    fun sendFriendRequestByUid(friendUid: String) {
+        val currentUser = auth.currentUser ?: return
+        if (friendUid == currentUser.uid) {
+            uiState = uiState.copy(addFriendStatus = "You cannot add yourself.")
+            return
+        }
+
+        uiState = uiState.copy(isLoading = true, addFriendStatus = null)
+        viewModelScope.launch {
+            runCatching {
+                userRepo.sendFriendRequest(currentUser.uid, friendUid)
+                "Friend request sent!"
+            }.onSuccess { msg ->
+                uiState = uiState.copy(isLoading = false, addFriendStatus = msg, friendUsernameQuery = "", searchResults = emptyList())
+            }.onFailure { e ->
+                uiState = uiState.copy(isLoading = false, addFriendStatus = e.message)
+            }
+        }
     }
 
     fun sendFriendRequest() {
@@ -204,9 +232,6 @@ class ProfileViewModel @Inject constructor(
         uiState = UiState(isLoading = true, error = null, userProfile = null, username = "")
     }
 
-    /**
-     * DEV ONLY: Resetează punctele și sticlele tuturor utilizatorilor.
-     */
     fun resetAllStatsForDev() {
         viewModelScope.launch {
             runCatching {
@@ -216,12 +241,11 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    // Salvează tot profilul (name, username, description, photoUrl)
     fun saveProfile(
         name: String,
         username: String,
         description: String,
-        photoUrl: String? // null = păstrăm ce era
+        photoUrl: String?
     ) {
         val current = auth.currentUser ?: return
         val currentProfile = uiState.userProfile ?: return
@@ -240,7 +264,7 @@ class ProfileViewModel @Inject constructor(
             uiState = if (result.isSuccess) {
                 uiState.copy(
                     isLoading = false,
-                    userProfile = updated,      // 🔥 ProfileScreen se actualizează imediat
+                    userProfile = updated,
                     username = updated.username
                 )
             } else {
@@ -252,21 +276,17 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    // Șterge poza de profil (din Storage + din profil) și actualizează UI
     fun removeProfilePhoto() {
         val current = auth.currentUser ?: return
         val profile = uiState.userProfile ?: return
 
-        if (profile.photoUrl.isBlank()) return  // nu are ce să șteargă
+        if (profile.photoUrl.isBlank()) return
 
         uiState = uiState.copy(isLoading = true, error = null)
 
         viewModelScope.launch {
             try {
-                // apel la repo -> șterge fișierul și resetează photoUrl în Firestore
                 userRepo.deleteProfilePhoto(current.uid)
-
-                // actualizăm și UI-ul local
                 val updated = profile.copy(photoUrl = "")
                 uiState = uiState.copy(
                     isLoading = false,
@@ -283,7 +303,4 @@ class ProfileViewModel @Inject constructor(
     fun refreshProfile() {
         loadUserProfile()
     }
-
-
-
 }
