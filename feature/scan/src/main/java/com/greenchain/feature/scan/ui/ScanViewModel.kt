@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import android.util.Log
 
-
 @HiltViewModel
 class ScanViewModel @Inject constructor(
     private val repo: ScanRepository,
@@ -26,7 +25,9 @@ class ScanViewModel @Inject constructor(
 
     private val _isValid = MutableStateFlow<Boolean?>(null)
     val isValid: StateFlow<Boolean?> = _isValid
+
     fun verifyCropped(cropped: Bitmap) {
+        if (_isVerifying.value) return
         Log.d("ScanVM", "verifyCropped() called, size=${cropped.width}x${cropped.height}")
 
         _isVerifying.value = true
@@ -40,8 +41,7 @@ class ScanViewModel @Inject constructor(
                 .getOrElse { false }
 
             if (ok) {
-                addBottleToCurrentUser()
-                addPointsToCurrentUser(5)
+                updateUserStats(pointsToAdd = 5, bottlesToAdd = 1)
             }
 
             Log.d("ScanVM", "verifyCropped() result = $ok")
@@ -50,25 +50,14 @@ class ScanViewModel @Inject constructor(
         }
     }
 
-    private suspend fun addPointsToCurrentUser(amount: Int) {
+    private suspend fun updateUserStats(pointsToAdd: Int, bottlesToAdd: Int) {
         val uid = auth.currentUser?.uid ?: return
         val userProfile = userRepository.getUserProfile(uid)
 
         userProfile?.let {
             val updatedProfile = it.copy(
-                points = it.points + amount
-            )
-            userRepository.saveUserProfile(updatedProfile)
-        }
-    }
-
-    private suspend fun addBottleToCurrentUser() {
-        val uid = auth.currentUser?.uid ?: return
-        val userProfile = userRepository.getUserProfile(uid)
-
-        userProfile?.let {
-            val updatedProfile = it.copy(
-                bottleCount = it.bottleCount + 1
+                points = it.points + pointsToAdd,
+                bottleCount = it.bottleCount + bottlesToAdd
             )
             userRepository.saveUserProfile(updatedProfile)
         }
@@ -76,7 +65,7 @@ class ScanViewModel @Inject constructor(
 
     fun simulateSuccessfulScan() {
         viewModelScope.launch {
-            addPointsToCurrentUser(1)
+            updateUserStats(pointsToAdd = 1, bottlesToAdd = 0)
         }
     }
 
