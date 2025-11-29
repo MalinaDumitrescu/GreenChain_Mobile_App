@@ -54,7 +54,7 @@ dependencies {
     implementation(libs.compose.ui.tooling)
     implementation(libs.compose.material3)
     implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-storage")
 
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
@@ -68,6 +68,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation("com.google.firebase:firebase-messaging")
 
     // AndroidX Core
     implementation(libs.androidx.core.ktx)

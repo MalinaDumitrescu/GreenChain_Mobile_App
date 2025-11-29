@@ -166,7 +166,7 @@ class UserRepository(
 
     /** Uploads a profile photo to Firebase Storage and returns the download URL */
     suspend fun uploadProfilePhoto(uid: String, imageUri: Uri): String {
-        val ref = storage.reference.child("profile_photos/$uid.jpg")
+        val ref = storage.reference.child("profilePictures/$uid")
         ref.putFile(imageUri).await()
         return ref.downloadUrl.await().toString()
     }
@@ -174,7 +174,7 @@ class UserRepository(
     /** Deletes the profile photo from Storage and updates Firestore */
     suspend fun deleteProfilePhoto(uid: String) {
         // 1. Delete from Storage
-        val ref = storage.reference.child("profile_photos/$uid.jpg")
+        val ref = storage.reference.child("profilePictures/$uid")
         try {
             ref.delete().await()
         } catch (e: Exception) {

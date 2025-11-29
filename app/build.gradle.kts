@@ -79,7 +79,6 @@ dependencies {
     implementation(libs.compose.runtime)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons.extended)
-    implementation(libs.firebase.crashlytics)
     debugImplementation(libs.compose.ui.tooling)
     implementation("com.google.android.material:material:1.12.0")
     implementation("org.tensorflow:tensorflow-lite:2.14.0")
@@ -102,7 +101,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
     implementation(libs.firebase.analytics)
-    implementation(libs.firebase.crashlytics.ktx)
+    implementation(libs.firebase.crashlytics)
+    implementation("com.google.firebase:firebase-messaging")
 
     // Tests
     testImplementation(libs.junit)
@@ -122,4 +122,5 @@ dependencies {
     implementation (project(":feature:auth"))
     implementation (project(":feature:profile"))
     implementation (project(":feature:setup"))
+    implementation(project(":feature:notifications"))
 }

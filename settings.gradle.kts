@@ -26,7 +26,8 @@ include(
     ":feature:map",
     ":feature:auth",
     ":feature:profile",
-    ":feature:setup"
+    ":feature:setup",
+    ":feature:notifications"
 )
 
 project(":core:model").projectDir = file("core/model")
@@ -35,3 +36,4 @@ project(":core:network").projectDir = file("core/network")
 project(":core:database").projectDir = file("core/database")
 project(":feature:profile").projectDir = file("feature/profile")
 project(":feature:setup").projectDir = file("feature/setup")
+project(":feature:notifications").projectDir = file("feature/notifications")
