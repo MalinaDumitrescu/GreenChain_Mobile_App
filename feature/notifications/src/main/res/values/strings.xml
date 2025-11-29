@@ -1,0 +1,4 @@
+<resources>
+    <string name="notification_channel_name">Friend Requests</string>
+    <string name="notification_channel_description">Notifications for incoming friend requests</string>
+</resources>

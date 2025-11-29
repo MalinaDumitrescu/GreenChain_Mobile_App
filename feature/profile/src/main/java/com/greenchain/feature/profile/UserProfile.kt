@@ -11,7 +11,8 @@ data class UserProfile(
     val photoUrl: String = "",
     val visibility: String = "public",
     val friends: List<String> = emptyList(),
-    val friendRequests: List<String> = emptyList()
+    val friendRequests: List<String> = emptyList(),
+    val fcmToken: String = ""
 ) {
     val displayName: String
         get() = when {

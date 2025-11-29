@@ -5,16 +5,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.greenchain.feature.profile.data.UserRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.messaging.FirebaseMessaging
+import com.greenchain.feature.profile.data.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val auth: FirebaseAuth,
-    private val userRepo: UserRepository
+    private val userRepo: UserRepository,
+    private val firebaseMessaging: FirebaseMessaging
 ) : ViewModel() {
 
     data class UiState(
@@ -61,7 +64,14 @@ class ProfileViewModel @Inject constructor(
                     profile = newProfile
                 }
 
-                val finalProfile = profile!!.copy(
+                // Get FCM token and update profile
+                val token = firebaseMessaging.token.await()
+                if (token.isNotBlank() && profile.fcmToken != token) {
+                    profile = profile.copy(fcmToken = token)
+                    userRepo.saveUserProfile(profile)
+                }
+
+                val finalProfile = profile.copy(
                     uid = if (profile.uid.isBlank()) currentUser.uid else profile.uid,
                     email = if (profile.email.isBlank()) currentUser.email.orEmpty() else profile.email,
                     name = if (profile.name.isBlank()) currentUser.displayName.orEmpty() else profile.name

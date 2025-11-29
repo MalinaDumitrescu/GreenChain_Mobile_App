@@ -1,8 +1,13 @@
 package com.greenchain.app
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -21,7 +26,6 @@ import javax.inject.Inject
 import androidx.navigation.NavDestination.Companion.hierarchy
 
 import com.google.firebase.firestore.FirebaseFirestore
-import android.util.Log
 import com.greenchain.core.database.AppDatabase
 
 import com.greenchain.app.ui.components.BottomNavBar
@@ -35,25 +39,25 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        // ✅ ROOM CHECK
-//        Log.d("Room", "Room DB: ${database.openHelper.writableDatabase.path}")
-//
-//        // ✅ FIRESTORE CHECK
-//        val db = FirebaseFirestore.getInstance()
-//        val testData = hashMapOf("status" to "connected", "timestamp" to System.currentTimeMillis())
-//
-//        db.collection("testCheck").document("ping")
-//            .set(testData)
-//            .addOnSuccessListener { Log.d("Firestore", "Write OK") }
-//            .addOnFailureListener { e -> Log.e("Firestore", "Write failed", e) }
-//
-//        db.collection("testCheck").document("ping")
-//            .get()
-//            .addOnSuccessListener { doc -> Log.d("Firestore", "Read OK: ${doc.data}") }
-//            .addOnFailureListener { e -> Log.e("Firestore", "Read failed", e) }
-
         setContent {
             GreenChainTheme {
+                // Notification Permission Request
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    val launcher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.RequestPermission(),
+                        onResult = { isGranted: Boolean ->
+                            if (isGranted) {
+                                Log.d("Notifications", "POST_NOTIFICATIONS permission granted")
+                            } else {
+                                Log.d("Notifications", "POST_NOTIFICATIONS permission denied")
+                            }
+                        }
+                    )
+                    LaunchedEffect(Unit) {
+                        launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+
                 val navController = rememberNavController()
                 val backStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = backStackEntry?.destination?.route ?: Routes.Home.route
