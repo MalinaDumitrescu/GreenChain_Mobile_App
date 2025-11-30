@@ -133,15 +133,6 @@ fun HomeScreen(onContinue: () -> Unit = {}) {
                     )
                 }
                 item {
-                    StatsCard(
-                        stats = listOf(
-                            "3" to "Bottles recycled today",
-                            "20" to "Total",
-                            "4kg" to "CO2 saved"
-                        )
-                    )
-                }
-                item {
                     CommunityPostCard(
                         author = "Janine",
                         time = "1h ago",
