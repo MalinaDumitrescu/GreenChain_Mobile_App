@@ -1,13 +1,18 @@
 package com.greenchain.app.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -16,6 +21,7 @@ import com.greenchain.app.ui.components.tokens.GCSpacing
 import com.greenchain.feature.homepage.HomeViewModel
 import com.greenchain.app.ui.theme.GreenPrimary
 import com.greenchain.app.ui.theme.BrownDark
+import com.greenchain.app.ui.theme.BrownLight
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -30,9 +36,16 @@ fun HomeScreen(
     val isQuestCompleted by homeViewModel.isQuestCompleted.collectAsState()
     val posts by homeViewModel.postsFlow.collectAsState(initial = emptyList())
     val currentUserId = homeViewModel.currentUserId
+    val currentUserProfile by homeViewModel.currentUserProfile.collectAsState()
 
     // State pentru popup-ul Quest
     var showQuestDialog by remember { mutableStateOf(false) }
+
+    // State pentru popup-ul Add Friend
+    var showAddFriendDialog by remember { mutableStateOf(false) }
+    val searchResults by homeViewModel.searchResults.collectAsState()
+    val friendRequestStatus by homeViewModel.friendRequestStatus.collectAsState()
+    var searchQuery by remember { mutableStateOf("") }
 
     val questProgress = if (isQuestCompleted) 1.0f else 0.0f
     val questStatusText = if (isQuestCompleted) "1/1" else "0/1"
@@ -120,6 +133,91 @@ fun HomeScreen(
         )
     }
 
+    // Popup-ul Add Friend
+    if (showAddFriendDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showAddFriendDialog = false
+                homeViewModel.clearSearch()
+                searchQuery = ""
+            },
+            title = { Text("Find Friends", color = BrownDark) },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = {
+                            searchQuery = it
+                            homeViewModel.searchUsers(it)
+                        },
+                        label = { Text("Search by username") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = GreenPrimary,
+                            focusedLabelColor = BrownDark
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
+                        items(searchResults) { user ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column {
+                                    Text(text = user.displayName, fontWeight = FontWeight.Medium, color = BrownDark)
+                                    if (user.username.isNotBlank()) {
+                                        Text(text = "@${user.username}", style = MaterialTheme.typography.bodySmall, color = BrownLight)
+                                    }
+                                }
+                                Button(
+                                    onClick = { homeViewModel.sendFriendRequest(user.uid) },
+                                    colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                    modifier = Modifier.height(32.dp)
+                                ) {
+                                    Text("Add", color = BrownDark, style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
+                            Divider(color = GreenPrimary.copy(alpha = 0.3f))
+                        }
+                    }
+
+                    if (searchResults.isEmpty() && searchQuery.isNotEmpty()) {
+                        Text("No users found", style = MaterialTheme.typography.bodySmall, color = BrownLight)
+                    }
+
+                    friendRequestStatus?.let { status ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = status,
+                            color = if (status.contains("sent", true)) GreenPrimary else MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showAddFriendDialog = false
+                        homeViewModel.clearSearch()
+                        searchQuery = ""
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = BrownDark)
+                ) {
+                    Text("Close")
+                }
+            }
+        )
+    }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -136,7 +234,7 @@ fun HomeScreen(
             modifier = Modifier.padding(paddingValues)
         ) {
             Column {
-                TopBar()
+                TopBar(profileImageUrl = currentUserProfile?.photoUrl)
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -150,6 +248,39 @@ fun HomeScreen(
                             QuoteCard()
                         }
                     }
+
+                    // Sectiunea Add Friends intre Quote si Quest
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showAddFriendDialog = true },
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            shape = RoundedCornerShape(16.dp),
+                            elevation = CardDefaults.cardElevation(2.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PersonAdd,
+                                    contentDescription = null,
+                                    tint = BrownLight
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Find & Add Friends",
+                                    color = BrownDark,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+
                     item {
                         QuestCard(
                             title = "Quest of the day",
