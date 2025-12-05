@@ -45,6 +45,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:data"))
     implementation(project(":core:network"))
+    implementation(project(":feature:profile")) // Added dependency
 
     // Compose
     implementation(platform(libs.compose.bom))

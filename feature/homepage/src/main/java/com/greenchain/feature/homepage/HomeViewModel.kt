@@ -2,14 +2,15 @@ package com.greenchain.feature.homepage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.greenchain.feature.homepage.data.HomeQuoteRepository
-// Eliminam dependenta problematica
-// import com.greenchain.feature.profile.data.UserRepository
-// import com.greenchain.feature.profile.UserProfile
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore // Folosim Firestore direct
+import com.google.firebase.firestore.FirebaseFirestore
+import com.greenchain.feature.homepage.data.HomeQuoteRepository
+import com.greenchain.feature.homepage.data.PostRepository
+import com.greenchain.feature.homepage.model.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -18,16 +19,22 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val homeQuoteRepository: HomeQuoteRepository,
-    private val firestore: FirebaseFirestore, // Injectam Firestore direct
+    private val postRepository: PostRepository,
+    private val firestore: FirebaseFirestore,
     private val auth: FirebaseAuth
 ) : ViewModel() {
 
     private val _quoteText = MutableStateFlow<String?>(null)
     val quoteText: StateFlow<String?> = _quoteText.asStateFlow()
 
-    // Starea quest-ului: null = loading, false = incomplet, true = complet
     private val _isQuestCompleted = MutableStateFlow(false)
     val isQuestCompleted: StateFlow<Boolean> = _isQuestCompleted.asStateFlow()
+
+    // Flow pentru postari
+    val postsFlow = postRepository.getPostsFlow()
+
+    val currentUserId: String?
+        get() = auth.currentUser?.uid
 
     init {
         loadRandomQuote()
@@ -43,17 +50,21 @@ class HomeViewModel @Inject constructor(
     private fun observeQuestStatus() {
         val uid = auth.currentUser?.uid ?: return
 
-        // Ascultam documentul utilizatorului direct
         val docRef = firestore.collection("users").document(uid)
 
         docRef.addSnapshotListener { snapshot, e ->
             if (e != null || snapshot == null || !snapshot.exists()) return@addSnapshotListener
 
-            // Citim manual campul lastDailyQuestDate
             val lastDate = snapshot.getString("lastDailyQuestDate")
             val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
 
             _isQuestCompleted.value = (lastDate == today)
+        }
+    }
+
+    fun deletePost(post: Post) {
+        viewModelScope.launch {
+            postRepository.deletePost(post)
         }
     }
 }

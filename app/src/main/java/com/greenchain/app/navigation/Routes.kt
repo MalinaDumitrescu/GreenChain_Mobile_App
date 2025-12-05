@@ -14,6 +14,7 @@ sealed class Routes(
     data object Profile     : Routes("profile", "Profile")
 
     data object EditProfile : Routes("edit_profile", "Edit Profile")
+    data object CreatePost : Routes("create_post", "Create Post")
 
     data object Help : Routes("help", "Help")
 

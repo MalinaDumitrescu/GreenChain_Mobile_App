@@ -7,7 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,8 +30,12 @@ fun CommunityPostCard(
     text: String,
     imageUrl: String,
     avatarUrl: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isAuthor: Boolean = false,
+    onDelete: () -> Unit = {}
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = GreenPrimary,
@@ -94,12 +98,28 @@ fun CommunityPostCard(
                     }
                 }
 
-                IconButton(onClick = { /* TODO: open menu */ }) {
-                    Icon(
-                        Icons.Filled.MoreVert,
-                        contentDescription = "More",
-                        tint = BrownLight
-                    )
+                if (isAuthor) {
+                    Box {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(
+                                Icons.Filled.MoreVert,
+                                contentDescription = "More",
+                                tint = BrownLight
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Delete") },
+                                onClick = {
+                                    showMenu = false
+                                    onDelete()
+                                }
+                            )
+                        }
+                    }
                 }
             }
 
@@ -114,18 +134,20 @@ fun CommunityPostCard(
 
             Spacer(Modifier.height(12.dp))
 
-            Surface(
-                color = Color(0xFFF0EAD2),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(192.dp)
-                )
+            if (imageUrl.isNotEmpty()) {
+                Surface(
+                    color = Color(0xFFF0EAD2),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(192.dp)
+                    )
+                }
             }
         }
     }
