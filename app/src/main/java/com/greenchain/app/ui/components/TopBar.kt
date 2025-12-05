@@ -11,17 +11,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.greenchain.app.R
 import com.greenchain.app.ui.theme.BrownDark
 import com.greenchain.app.ui.theme.GreenPrimary
 import com.greenchain.app.ui.theme.GreenSecondary
 
 @Composable
-fun TopBar(modifier: Modifier = Modifier) {
+fun TopBar(
+    modifier: Modifier = Modifier,
+    profileImageUrl: String? = null
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -51,15 +56,25 @@ fun TopBar(modifier: Modifier = Modifier) {
         Box(
             modifier = Modifier
                 .border(width = 2.dp, color = BrownDark, shape = CircleShape)
-                .size(36.dp),
+                .size(36.dp)
+                .clip(CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Outlined.Person,
-                contentDescription = "Profile",
-                tint = BrownDark,
-                modifier = Modifier.size(22.dp)
-            )
+            if (!profileImageUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = profileImageUrl,
+                    contentDescription = "Profile",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Outlined.Person,
+                    contentDescription = "Profile",
+                    tint = BrownDark,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
         }
     }
 }
