@@ -54,7 +54,19 @@ fun AppNavGraph(
         }
 
         composable(Routes.Home.route) {
-            HomeScreen()
+            HomeScreen(
+                onNavigateToCreatePost = {
+                    navController.navigate(Routes.CreatePost.route)
+                }
+            )
+        }
+
+        composable(Routes.CreatePost.route) {
+            CreatePostScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         composable(Routes.Scan.route) {
