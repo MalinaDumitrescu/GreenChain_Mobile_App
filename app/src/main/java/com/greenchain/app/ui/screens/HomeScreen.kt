@@ -14,8 +14,10 @@ import com.greenchain.feature.homepage.HomeViewModel
 import com.greenchain.app.ui.theme.GreenPrimary
 import com.greenchain.app.ui.theme.BrownDark
 
+import com.greenchain.app.ui.components.SearchProfileButton
+
 @Composable
-fun HomeScreen(onContinue: () -> Unit = {}) {
+fun HomeScreen(onContinue: () -> Unit = {}, onSearchClick: () -> Unit = {}) {
     val homeViewModel: HomeViewModel = hiltViewModel()
     val quoteText by homeViewModel.quoteText.collectAsState()
     val isQuestCompleted by homeViewModel.isQuestCompleted.collectAsState()
@@ -112,6 +114,11 @@ fun HomeScreen(onContinue: () -> Unit = {}) {
     Surface(color = MaterialTheme.colorScheme.background) {
         Column {
             TopBar()
+
+            SearchProfileButton(
+                onClick = onSearchClick
+            )
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
