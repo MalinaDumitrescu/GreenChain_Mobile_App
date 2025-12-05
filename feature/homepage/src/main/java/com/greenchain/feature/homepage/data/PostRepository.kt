@@ -48,9 +48,11 @@ class PostRepository @Inject constructor(
     }
 
     fun getPostsFlow(): Flow<List<Post>> = callbackFlow {
+        // Marim limita la 100 pentru a permite filtrarea client-side mai eficienta
+        // Intr-o aplicatie de productie, ar trebui folosit 'whereIn' si paginare cu indexi compusi.
         val listener = firestore.collection("posts")
             .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(20)
+            .limit(100)
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
                     close(e)

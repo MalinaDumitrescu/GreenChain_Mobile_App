@@ -34,6 +34,7 @@ fun HomeScreen(
     val homeViewModel: HomeViewModel = hiltViewModel()
     val quoteText by homeViewModel.quoteText.collectAsState()
     val isQuestCompleted by homeViewModel.isQuestCompleted.collectAsState()
+    val dailyQuest by homeViewModel.dailyQuest.collectAsState()
     val posts by homeViewModel.postsFlow.collectAsState(initial = emptyList())
     val currentUserId = homeViewModel.currentUserId
     val currentUserProfile by homeViewModel.currentUserProfile.collectAsState()
@@ -78,14 +79,14 @@ fun HomeScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "Recycle 1 plastic bottle",
+                                text = dailyQuest?.title ?: "Loading...",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = BrownDark
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Scan and recycle at least one plastic bottle to complete this quest and earn 15 points!",
+                                text = dailyQuest?.description ?: "",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -123,11 +124,23 @@ fun HomeScreen(
                 }
             },
             confirmButton = {
-                Button(
-                    onClick = { showQuestDialog = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
-                ) {
-                    Text("Got it!", color = BrownDark)
+                if (!isQuestCompleted) {
+                    Button(
+                        onClick = {
+                            homeViewModel.completeDailyQuest()
+                            showQuestDialog = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
+                    ) {
+                        Text("Mark as Done", color = BrownDark)
+                    }
+                } else {
+                    Button(
+                        onClick = { showQuestDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
+                    ) {
+                        Text("Close", color = BrownDark)
+                    }
                 }
             }
         )
@@ -283,7 +296,7 @@ fun HomeScreen(
 
                     item {
                         QuestCard(
-                            title = "Quest of the day",
+                            title = dailyQuest?.title ?: "Quest of the day",
                             progress = questProgress,
                             onView = { showQuestDialog = true }
                         )
