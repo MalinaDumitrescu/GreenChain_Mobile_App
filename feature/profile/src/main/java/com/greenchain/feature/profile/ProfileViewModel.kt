@@ -10,9 +10,14 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.greenchain.feature.profile.data.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val auth: FirebaseAuth,
@@ -30,13 +35,40 @@ class ProfileViewModel @Inject constructor(
         val searchResults: List<UserProfile> = emptyList(),
         val addFriendStatus: String? = null,
         val friendsList: List<UserProfile> = emptyList(),
-        val friendRequestsList: List<UserProfile> = emptyList()
+        val friendRequestsList: List<UserProfile> = emptyList(),
+        val isCheckingUsername: Boolean = false,
+        val usernameMessage: String? = null,
+        val isUsernameAvailable: Boolean = false
     )
 
     var uiState by mutableStateOf(UiState(isLoading = true))
         private set
 
+    private val usernameFlow = MutableStateFlow("")
 
+    init {
+        viewModelScope.launch {
+            usernameFlow
+                .debounce(300L)
+                .collectLatest { username ->
+                    if (username.length < 3) {
+                        uiState = uiState.copy(
+                            isCheckingUsername = false,
+                            usernameMessage = if (username.isNotEmpty()) "Username must be at least 3 characters" else null,
+                            isUsernameAvailable = false
+                        )
+                        return@collectLatest
+                    }
+                    uiState = uiState.copy(isCheckingUsername = true, usernameMessage = null)
+                    val isAvailable = userRepo.isUsernameAvailable(username)
+                    uiState = uiState.copy(
+                        isCheckingUsername = false,
+                        usernameMessage = if (isAvailable) "Username is available!" else "Username is already taken.",
+                        isUsernameAvailable = isAvailable
+                    )
+                }
+        }
+    }
 
     private fun loadUserProfile() {
         val currentUser = auth.currentUser
@@ -137,6 +169,7 @@ class ProfileViewModel @Inject constructor(
 
     fun onUsernameChange(value: String) {
         uiState = uiState.copy(username = value)
+        usernameFlow.value = value
     }
 
     fun saveUsername(onResult: (Boolean, String?) -> Unit) {
@@ -289,9 +322,20 @@ class ProfileViewModel @Inject constructor(
         val current = auth.currentUser ?: return
         val currentProfile = uiState.userProfile ?: return
 
+        if (!uiState.isUsernameAvailable && username != currentProfile.username) {
+            uiState = uiState.copy(isLoading = false, error = "Username is not available or invalid.")
+            return
+        }
+
+        val trimmedUsername = username.trim()
+        if (trimmedUsername.isBlank()) {
+            uiState = uiState.copy(isLoading = false, error = "Username cannot be empty")
+            return
+        }
+
         val updated = currentProfile.copy(
             name = name.trim(),
-            username = username.trim(),
+            username = trimmedUsername,
             description = description.trim(),
             photoUrl = photoUrl ?: currentProfile.photoUrl
         )
