@@ -3,8 +3,10 @@ package com.greenchain.app.navigation
 import androidx.compose.runtime.Composable
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.greenchain.app.ui.screens.*
 import com.greenchain.feature.scan.ui.ScanScreen
 import com.greenchain.feature.auth.AuthScreen
@@ -91,6 +93,20 @@ fun AppNavGraph(
             ProfileScreen(
                 navController = navController,
                 viewModel = vm
+            )
+        }
+
+        composable(
+            route = Routes.FriendProfile.route,
+            arguments = listOf(navArgument("uid") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val vm: ProfileViewModel = hiltViewModel()
+            val friendUid = backStackEntry.arguments?.getString("uid")
+
+            ProfileScreen(
+                navController = navController,
+                viewModel = vm,
+                viewedUserId = friendUid
             )
         }
 

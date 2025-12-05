@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.greenchain.app.ui.components.*
 import com.greenchain.app.ui.components.tokens.GCSpacing
+import com.greenchain.app.ui.theme.Background
 import com.greenchain.feature.homepage.HomeViewModel
 import com.greenchain.app.ui.theme.GreenPrimary
 import com.greenchain.app.ui.theme.BrownDark
@@ -38,11 +39,7 @@ fun HomeScreen(
     val posts by homeViewModel.postsFlow.collectAsState(initial = emptyList())
     val currentUserId = homeViewModel.currentUserId
     val currentUserProfile by homeViewModel.currentUserProfile.collectAsState()
-
-    // State pentru popup-ul Quest
     var showQuestDialog by remember { mutableStateOf(false) }
-
-    // State pentru popup-ul Add Friend
     var showAddFriendDialog by remember { mutableStateOf(false) }
     val searchResults by homeViewModel.searchResults.collectAsState()
     val friendRequestStatus by homeViewModel.friendRequestStatus.collectAsState()
@@ -51,7 +48,6 @@ fun HomeScreen(
     val questProgress = if (isQuestCompleted) 1.0f else 0.0f
     val questStatusText = if (isQuestCompleted) "1/1" else "0/1"
 
-    // Popup-ul Quest
     if (showQuestDialog) {
         AlertDialog(
             onDismissRequest = { showQuestDialog = false },
@@ -146,7 +142,6 @@ fun HomeScreen(
         )
     }
 
-    // Popup-ul Add Friend
     if (showAddFriendDialog) {
         AlertDialog(
             onDismissRequest = {
@@ -268,9 +263,11 @@ fun HomeScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { showAddFriendDialog = true },
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
-                            shape = RoundedCornerShape(16.dp),
-                            elevation = CardDefaults.cardElevation(2.dp)
+                            colors = CardDefaults.cardColors(
+                                containerColor = BrownLight   // fundal maro închis
+                            ),
+                            shape = RoundedCornerShape(24.dp),
+                            elevation = CardDefaults.cardElevation(0.dp)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -282,17 +279,18 @@ fun HomeScreen(
                                 Icon(
                                     imageVector = Icons.Default.PersonAdd,
                                     contentDescription = null,
-                                    tint = BrownLight
+                                    tint = Background     // icon bej deschis
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "Find & Add Friends",
-                                    color = BrownDark,
+                                    color = Background,   // text bej deschis
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
                         }
                     }
+
 
                     item {
                         QuestCard(

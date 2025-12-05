@@ -13,6 +13,10 @@ sealed class Routes(
     data object Leaderboard : Routes("leaderboard", "Leaderboard")
     data object Profile     : Routes("profile", "Profile")
 
+    data object FriendProfile : Routes(
+        route = "friend_profile/{uid}",
+        label = "Profile"
+    )
     data object EditProfile : Routes("edit_profile", "Edit Profile")
     data object CreatePost : Routes("create_post", "Create Post")
 

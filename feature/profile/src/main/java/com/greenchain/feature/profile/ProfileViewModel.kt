@@ -36,9 +36,7 @@ class ProfileViewModel @Inject constructor(
     var uiState by mutableStateOf(UiState(isLoading = true))
         private set
 
-    init {
-        loadUserProfile()
-    }
+
 
     private fun loadUserProfile() {
         val currentUser = auth.currentUser
@@ -105,6 +103,37 @@ class ProfileViewModel @Inject constructor(
             }
         }
     }
+
+    fun loadProfileFor(uid: String?) {
+        if (uid.isNullOrBlank()) return
+
+        uiState = uiState.copy(isLoading = true, error = null)
+
+        viewModelScope.launch {
+            try {
+                // 🔹 aici NU folosim currentUser, ci UID-ul primit
+                val profile = userRepo.getUserProfile(uid)
+                    ?: throw Exception("User not found")
+
+                uiState = uiState.copy(
+                    isLoading = false,
+                    userProfile = profile,
+                    username = profile.username,
+                    // pe profilul prietenului NU ne interesează lista lui de prieteni / requests
+                    friendsList = emptyList(),
+                    friendRequestsList = emptyList(),
+                    error = null
+                )
+            } catch (e: Exception) {
+                uiState = uiState.copy(
+                    isLoading = false,
+                    error = e.localizedMessage ?: "Failed to load profile."
+                )
+            }
+        }
+    }
+
+
 
     fun onUsernameChange(value: String) {
         uiState = uiState.copy(username = value)
