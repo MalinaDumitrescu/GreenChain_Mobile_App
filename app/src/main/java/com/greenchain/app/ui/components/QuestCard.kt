@@ -53,9 +53,10 @@ fun QuestCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            val progressText = if (progress >= 1.0f) "1/1" else "0/1"
 
             Text(
-                text = "0/1",
+                text = progressText,
                 color = BrownLight,
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -67,7 +68,7 @@ fun QuestCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
-                    .background(color = GreenPrimary, shape = RoundedCornerShape(50))
+                    .background(color = BrownDark.copy(alpha = 0.2f), shape = RoundedCornerShape(50))
             ) {
                 Box(
                     modifier = Modifier

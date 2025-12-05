@@ -3,17 +3,22 @@ package com.greenchain.feature.homepage
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.greenchain.feature.homepage.data.HomeQuoteRepository
 import com.greenchain.feature.homepage.data.PostRepository
+import com.greenchain.feature.homepage.data.QuestRepository
 import com.greenchain.feature.homepage.model.Post
+import com.greenchain.feature.homepage.model.Quest
 import com.greenchain.feature.profile.data.UserRepository
 import com.greenchain.feature.profile.UserProfile
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,6 +28,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val homeQuoteRepository: HomeQuoteRepository,
     private val postRepository: PostRepository,
+    private val questRepository: QuestRepository,
     private val userRepository: UserRepository,
     private val firestore: FirebaseFirestore,
     private val auth: FirebaseAuth
@@ -34,6 +40,9 @@ class HomeViewModel @Inject constructor(
     private val _isQuestCompleted = MutableStateFlow(false)
     val isQuestCompleted: StateFlow<Boolean> = _isQuestCompleted.asStateFlow()
 
+    private val _dailyQuest = MutableStateFlow<Quest?>(null)
+    val dailyQuest: StateFlow<Quest?> = _dailyQuest.asStateFlow()
+
     // Search Friends State
     private val _searchResults = MutableStateFlow<List<UserProfile>>(emptyList())
     val searchResults: StateFlow<List<UserProfile>> = _searchResults.asStateFlow()
@@ -44,14 +53,24 @@ class HomeViewModel @Inject constructor(
     private val _currentUserProfile = MutableStateFlow<UserProfile?>(null)
     val currentUserProfile: StateFlow<UserProfile?> = _currentUserProfile.asStateFlow()
 
-    // Flow pentru postari
-    val postsFlow = postRepository.getPostsFlow()
+    // Flow filtrat pentru postari: Doar ale utilizatorului si ale prietenilor
+    val postsFlow: Flow<List<Post>> = postRepository.getPostsFlow()
+        .combine(currentUserProfile) { posts, userProfile ->
+            if (userProfile == null) {
+                emptyList()
+            } else {
+                posts.filter { post ->
+                    post.authorId == userProfile.uid || userProfile.friends.contains(post.authorId)
+                }
+            }
+        }
 
     val currentUserId: String?
         get() = auth.currentUser?.uid
 
     init {
         loadRandomQuote()
+        loadDailyQuest()
         observeQuestStatus()
         observeCurrentUser()
     }
@@ -60,6 +79,10 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _quoteText.value = homeQuoteRepository.getRandomQuote().text
         }
+    }
+
+    private fun loadDailyQuest() {
+        _dailyQuest.value = questRepository.getDailyQuest()
     }
 
     private fun observeQuestStatus() {
@@ -82,6 +105,31 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             userRepository.getUserProfileFlow(uid).collectLatest { profile ->
                 _currentUserProfile.value = profile
+            }
+        }
+    }
+
+    fun completeDailyQuest() {
+        val uid = auth.currentUser?.uid ?: return
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+        val questPoints = _dailyQuest.value?.points ?: 15
+
+        val userRef = firestore.collection("users").document(uid)
+
+        // Folosim o corutină pe IO (implicit prin viewModelScope, dar Firestore e async oricum)
+        viewModelScope.launch {
+            try {
+                firestore.runTransaction { transaction ->
+                    val snapshot = transaction.get(userRef)
+                    val lastDate = snapshot.getString("lastDailyQuestDate")
+
+                    if (lastDate != today) {
+                        transaction.update(userRef, "lastDailyQuestDate", today)
+                        transaction.update(userRef, "points", FieldValue.increment(questPoints.toLong()))
+                    }
+                }
+            } catch (e: Exception) {
+                // Log error
             }
         }
     }
