@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.google.firebase.auth.FirebaseAuth
 import com.greenchain.feature.profile.ProfileViewModel
 import com.greenchain.feature.profile.UserProfile
 import com.greenchain.app.ui.theme.Background
@@ -40,6 +41,7 @@ import com.greenchain.app.navigation.Routes
 fun ProfileScreen(
     navController: NavController,
     viewModel: ProfileViewModel,
+    viewedUserId: String? = null,
     onHelpClick: () -> Unit = {}
 ) {
     val state = viewModel.uiState
@@ -51,6 +53,22 @@ fun ProfileScreen(
 
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val profileUpdated = savedStateHandle?.get<Boolean>("profileUpdated") ?: false
+
+    val currentUid = FirebaseAuth.getInstance().currentUser?.uid
+    val isOwnProfile = viewedUserId == null || viewedUserId == currentUid
+
+    LaunchedEffect(viewedUserId) {
+        when {
+            // profilul MEU
+            viewedUserId == null || viewedUserId == currentUid -> {
+                viewModel.refreshProfile()
+            }
+            // profilul unui PRIETEN
+            else -> {
+                viewModel.loadProfileFor(viewedUserId)
+            }
+        }
+    }
 
     LaunchedEffect(profileUpdated) {
         if (profileUpdated) {
@@ -173,11 +191,18 @@ fun ProfileScreen(
                         items(state.friendsList) { friend ->
                             FriendItem(
                                 friend = friend,
-                                onDeleteClick = { viewModel.removeFriend(friend.uid) }
+                                onDeleteClick = { viewModel.removeFriend(friend.uid) },
+                                onClick = {
+                                    showFriendsSheet = false
+                                    navController.navigate(
+                                        Routes.FriendProfile.route.replace("{uid}", friend.uid)
+                                    )
+                                }
                             )
                         }
                     }
                 }
+
             }
         }
     }
@@ -313,13 +338,15 @@ fun ProfileScreen(
                                     color = BrownDark
                                 )
                                 Spacer(Modifier.height(8.dp))
-                                ProfileInfoRow(
-                                    label = "Visibility",
-                                    value = profile.visibility.replaceFirstChar { it.uppercase() }
-                                )
+
                                 if (profile.description.isNotBlank()) {
                                     Spacer(Modifier.height(8.dp))
-                                    Text(text = "About", fontSize = 13.sp, color = BrownDark, fontWeight = FontWeight.Medium)
+                                    Text(
+                                        text = "Description",
+                                        fontSize = 13.sp,
+                                        color = BrownDark,
+                                        fontWeight = FontWeight.Medium
+                                    )
                                     Spacer(Modifier.height(2.dp))
                                     Text(text = profile.description, fontSize = 13.sp, color = BrownDark)
                                 }
@@ -330,7 +357,7 @@ fun ProfileScreen(
                     }
 
                     // 4. FRIEND REQUESTS (Visible directly)
-                    if (state.friendRequestsList.isNotEmpty()) {
+                    if (isOwnProfile && state.friendRequestsList.isNotEmpty()) {
                         item {
                             Text(
                                 text = "Friend Requests",
@@ -352,118 +379,120 @@ fun ProfileScreen(
                     }
 
                     // 5. MY FRIENDS BUTTON (Replaces the long list)
-                    item {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { showFriendsSheet = true },
-                            shape = RoundedCornerShape(24.dp),
-                            colors = CardDefaults.cardColors(containerColor = GreenPrimary),
-                            elevation = CardDefaults.cardElevation(0.dp)
-                        ) {
-                            Row(
+                    if (isOwnProfile) {
+                        item {
+                            Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                    .clickable { showFriendsSheet = true },
+                                shape = RoundedCornerShape(24.dp),
+                                colors = CardDefaults.cardColors(containerColor = GreenPrimary),
+                                elevation = CardDefaults.cardElevation(0.dp)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Groups,
-                                        contentDescription = null,
-                                        tint = BrownLight,
-                                        modifier = Modifier.size(28.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Text(
-                                        text = "See my Friends",
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = BrownDark
-                                    )
-                                }
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = state.friendsList.size.toString(),
-                                        fontSize = 16.sp,
-                                        color = BrownLight,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Icon(
-                                        imageVector = Icons.Default.ArrowForwardIos,
-                                        contentDescription = "Open",
-                                        tint = BrownLight,
-                                        modifier = Modifier.size(16.dp)
-                                    )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Groups,
+                                            contentDescription = null,
+                                            tint = BrownLight,
+                                            modifier = Modifier.size(28.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(16.dp))
+                                        Text(
+                                            text = "See my Friends",
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = BrownDark
+                                        )
+                                    }
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = state.friendsList.size.toString(),
+                                            fontSize = 16.sp,
+                                            color = BrownLight,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowForwardIos,
+                                            contentDescription = "Open",
+                                            tint = BrownLight,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
                                 }
                             }
+                            Spacer(Modifier.height(22.dp))
                         }
-                        Spacer(Modifier.height(22.dp))
                     }
 
                     // 6. BUTTONS (Now always close to the bottom)
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Button(
-                                onClick = { navController.navigate(Routes.EditProfile.route) },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = GreenPrimary.copy(alpha = 0.8f),
-                                    contentColor = BrownDark
-                                ),
-                                shape = RoundedCornerShape(16.dp)
+                    if (isOwnProfile) {
+                        item {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                Text("Edit profile", fontWeight = FontWeight.Medium)
+                                Button(
+                                    onClick = { navController.navigate(Routes.EditProfile.route) },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = GreenPrimary.copy(alpha = 0.8f),
+                                        contentColor = BrownDark
+                                    ),
+                                    shape = RoundedCornerShape(16.dp)
+                                ) {
+                                    Text("Edit profile", fontWeight = FontWeight.Medium)
+                                }
+
+                                Button(
+                                    onClick = {
+                                        viewModel.logout()
+                                        navController.navigate(Routes.Auth.route) {
+                                            popUpTo(Routes.Home.route) { inclusive = true }
+                                            launchSingleTop = true
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = BrownLight,
+                                        contentColor = Color.White
+                                    ),
+                                    shape = RoundedCornerShape(16.dp)
+                                ) {
+                                    Text("Logout", fontWeight = FontWeight.Medium)
+                                }
                             }
 
-                            Button(
-                                onClick = {
-                                    viewModel.logout()
-                                    navController.navigate(Routes.Auth.route) {
-                                        popUpTo(Routes.Home.route) { inclusive = true }
-                                        launchSingleTop = true
-                                    }
-                                },
+                            Spacer(Modifier.height(16.dp))
+
+                            Box(
                                 modifier = Modifier
-                                    .weight(1f)
-                                    .height(48.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = BrownLight,
-                                    contentColor = Color.White
-                                ),
-                                shape = RoundedCornerShape(16.dp)
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        navController.navigate(Routes.Help.route)
+                                    },
+                                contentAlignment = Alignment.Center
                             ) {
-                                Text("Logout", fontWeight = FontWeight.Medium)
+                                Text(
+                                    text = "Help & FAQ about your account",
+                                    color = BrownLight,
+                                    fontSize = 14.sp
+                                )
                             }
+
+                            Spacer(Modifier.height(24.dp))
                         }
-
-                        Spacer(Modifier.height(16.dp))
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    navController.navigate(Routes.Help.route)
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Help & FAQ about your account",
-                                color = BrownLight,
-                                fontSize = 14.sp
-                            )
-                        }
-
-
-
-                        Spacer(Modifier.height(24.dp))
                     }
                 }
             }
@@ -544,7 +573,7 @@ fun FriendRequestItem(user: UserProfile, onAccept: () -> Unit, onDecline: () -> 
 }
 
 @Composable
-fun FriendItem(friend: UserProfile, onDeleteClick: () -> Unit) {
+fun FriendItem(friend: UserProfile, onDeleteClick: () -> Unit, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -553,6 +582,7 @@ fun FriendItem(friend: UserProfile, onDeleteClick: () -> Unit) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { onClick() }
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
