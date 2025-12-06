@@ -23,14 +23,15 @@ class PostRepository @Inject constructor(
         val userProfile = userRepository.getUserProfile(authorId)
             ?: throw IllegalStateException("User profile not found")
 
+        val postId = UUID.randomUUID().toString()
         val imageUrl = if (imageUri != null) {
-            uploadPostImage(authorId, imageUri)
+            uploadPostImage(authorId, postId, imageUri)
         } else {
             null
         }
 
         val post = Post(
-            id = UUID.randomUUID().toString(),
+            id = postId,
             authorId = authorId,
             authorName = userProfile.name,
             authorAvatarUrl = userProfile.photoUrl,
@@ -41,10 +42,10 @@ class PostRepository @Inject constructor(
         firestore.collection("posts").document(post.id).set(post).await()
     }
 
-    private suspend fun uploadPostImage(userId: String, uri: Uri): String {
-        val storageRef = storage.reference.child("post_images/$userId/${uri.lastPathSegment}")
-        val uploadTask = storageRef.putFile(uri).await()
-        return uploadTask.storage.downloadUrl.await().toString()
+    private suspend fun uploadPostImage(userId: String, postId: String, uri: Uri): String {
+        val ref = storage.reference.child("postPicture/$userId/$postId")
+        ref.putFile(uri).await()
+        return ref.downloadUrl.await().toString()
     }
 
     fun getPostsFlow(): Flow<List<Post>> = callbackFlow {

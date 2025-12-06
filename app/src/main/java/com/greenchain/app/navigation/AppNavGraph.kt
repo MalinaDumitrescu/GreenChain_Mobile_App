@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.greenchain.app.ui.screens.*
 import com.greenchain.feature.scan.ui.ScanScreen
 import com.greenchain.feature.auth.AuthScreen
+import com.greenchain.feature.auth.AuthViewModel
 import com.greenchain.feature.map.MapScreen
 import com.greenchain.feature.profile.ProfileViewModel
 import com.greenchain.app.ui.screens.ProfileScreen
@@ -36,9 +37,12 @@ fun AppNavGraph(
         }
 
         composable(Routes.Auth.route) {
+            val vm: AuthViewModel = hiltViewModel()
             AuthScreen(
-                onSuccess = {
-                    navController.navigate(Routes.Setup.route) {
+                vm = vm,
+                onSuccess = { isNewUser ->
+                    val destination = if (isNewUser) Routes.Setup.route else Routes.Home.route
+                    navController.navigate(destination) {
                         popUpTo(Routes.Auth.route) { inclusive = true }
                     }
                 }

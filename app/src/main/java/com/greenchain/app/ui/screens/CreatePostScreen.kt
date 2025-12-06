@@ -90,10 +90,8 @@ fun CreatePostScreen(
                 AsyncImage(
                     model = selectedImageUri,
                     contentDescription = "Selected Image",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    contentScale = ContentScale.Crop
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.Fit
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 TextButton(onClick = { selectedImageUri = null }) {

@@ -15,7 +15,8 @@ data class AuthUiState(
     val password: String = "",
     val loading: Boolean = false,
     val error: String? = null,
-    val success: Boolean = false
+    val success: Boolean = false,
+    val isNewUser: Boolean = false
 )
 
 @HiltViewModel
@@ -29,20 +30,20 @@ class AuthViewModel @Inject constructor(
     fun onEmail(v: String) { _ui.value = _ui.value.copy(email = v) }
     fun onPassword(v: String) { _ui.value = _ui.value.copy(password = v) }
 
-    fun login() = authAction { repo.login(_ui.value.email.trim(), _ui.value.password) }
-    fun register() = authAction { repo.register(_ui.value.email.trim(), _ui.value.password) }
+    fun login() = authAction(isNewUser = false) { repo.login(_ui.value.email.trim(), _ui.value.password) }
+    fun register() = authAction(isNewUser = true) { repo.register(_ui.value.email.trim(), _ui.value.password) }
 
     fun onNavigated() {
         _ui.update { it.copy(success = false) }
     }
 
 
-    private fun authAction(block: suspend () -> Unit) {
+    private fun authAction(isNewUser: Boolean, block: suspend () -> Unit) {
         viewModelScope.launch {
             _ui.value = _ui.value.copy(loading = true, error = null)
             try {
                 block()
-                _ui.value = _ui.value.copy(loading = false, success = true)
+                _ui.value = _ui.value.copy(loading = false, success = true, isNewUser = isNewUser)
             } catch (t: Throwable) {
                 _ui.value = _ui.value.copy(loading = false, error = t.message ?: "Auth failed")
             }

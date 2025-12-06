@@ -19,6 +19,9 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -123,7 +126,11 @@ fun ScanScreen(
                             CircularProgressIndicator()
                         }
                         isValid == true -> {
-                            Text("✅ SGR logo detected!", color = Color(0xFF1B5E20))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Done, contentDescription = "Success", tint = Color(0xFF1B5E20))
+                                Spacer(Modifier.width(8.dp))
+                                Text("SGR logo detected!", color = Color(0xFF1B5E20))
+                            }
                             Spacer(Modifier.height(8.dp))
                             Button(onClick = {
                                 // Hook: update counters / Firestore if needed
@@ -134,7 +141,11 @@ fun ScanScreen(
                             }
                         }
                         isValid == false -> {
-                            Text("❌ No SGR logo detected.", color = Color(0xFFB71C1C))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Close, contentDescription = "Failure", tint = Color(0xFFB71C1C))
+                                Spacer(Modifier.width(8.dp))
+                                Text("No SGR logo detected.", color = Color(0xFFB71C1C))
+                            }
                             Spacer(Modifier.height(8.dp))
                             OutlinedButton(onClick = {
                                 viewModel.reset()
