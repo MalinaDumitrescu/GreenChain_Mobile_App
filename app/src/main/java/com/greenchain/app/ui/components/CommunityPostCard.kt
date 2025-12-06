@@ -142,10 +142,8 @@ fun CommunityPostCard(
                     AsyncImage(
                         model = imageUrl,
                         contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(192.dp)
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }

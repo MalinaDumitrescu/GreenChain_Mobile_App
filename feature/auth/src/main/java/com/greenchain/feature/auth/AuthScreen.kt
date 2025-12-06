@@ -11,7 +11,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun AuthScreen(
-    onSuccess: () -> Unit,
+    onSuccess: (isNewUser: Boolean) -> Unit,
     vm: AuthViewModel = hiltViewModel()
 ) {
     val ui by vm.ui.collectAsState()
@@ -19,7 +19,7 @@ fun AuthScreen(
     if (ui.success) {
 
         LaunchedEffect(ui.success) {
-            onSuccess()
+            onSuccess(ui.isNewUser)
             vm.onNavigated()
         }
     }
