@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
+import com.greenchain.core.network.di.AuthStateProvider
 import com.greenchain.feature.profile.data.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -22,7 +23,8 @@ import kotlinx.coroutines.tasks.await
 class ProfileViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val userRepo: UserRepository,
-    private val firebaseMessaging: FirebaseMessaging
+    private val firebaseMessaging: FirebaseMessaging,
+    private val authStateProvider: AuthStateProvider
 ) : ViewModel() {
 
     data class UiState(
@@ -48,6 +50,16 @@ class ProfileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            authStateProvider.authState.collectLatest { user ->
+                if (user == null) {
+                    uiState = UiState(isLoading = false, error = "You are not logged in.")
+                } else {
+                    loadUserProfile(user.uid)
+                }
+            }
+        }
+
+        viewModelScope.launch {
             usernameFlow
                 .debounce(300L)
                 .collectLatest { username ->
@@ -70,18 +82,13 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    private fun loadUserProfile() {
-        val currentUser = auth.currentUser
-        if (currentUser == null) {
-            uiState = UiState(isLoading = false, error = "You are not logged in.")
-            return
-        }
-
+    private fun loadUserProfile(uid: String) {
         uiState = uiState.copy(isLoading = true, error = null)
 
         viewModelScope.launch {
             try {
-                var profile = userRepo.getUserProfile(currentUser.uid)
+                var profile = userRepo.getUserProfile(uid)
+                val currentUser = auth.currentUser!!
 
                 if (profile == null) {
                     val newProfile = UserProfile(
@@ -264,7 +271,7 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 userRepo.acceptFriendRequest(currentUser.uid, friendId)
-                loadUserProfile()
+                loadUserProfile(currentUser.uid)
             }.onFailure { e ->
                 uiState = uiState.copy(isLoading = false, error = e.localizedMessage)
             }
@@ -277,7 +284,7 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 userRepo.declineFriendRequest(currentUser.uid, friendId)
-                loadUserProfile()
+                loadUserProfile(currentUser.uid)
             }.onFailure { e ->
                 uiState = uiState.copy(isLoading = false, error = e.localizedMessage)
             }
@@ -290,7 +297,7 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 userRepo.removeFriend(currentUser.uid, friendId)
-                loadUserProfile()
+                loadUserProfile(currentUser.uid)
                 "Friend removed."
             }.onFailure { e ->
                  uiState = uiState.copy(isLoading = false, error = e.localizedMessage)
@@ -308,7 +315,8 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 userRepo.resetAllUsersStats()
-                loadUserProfile() // Reload UI
+                val currentUser = auth.currentUser?.uid ?: return@runCatching
+                loadUserProfile(currentUser) // Reload UI
             }
         }
     }
@@ -384,6 +392,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
     fun refreshProfile() {
-        loadUserProfile()
+        val uid = auth.currentUser?.uid ?: return
+        loadUserProfile(uid)
     }
 }

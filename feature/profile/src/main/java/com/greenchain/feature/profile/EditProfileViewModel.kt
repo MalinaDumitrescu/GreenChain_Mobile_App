@@ -3,11 +3,12 @@ package com.greenchain.feature.profile
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
+import com.greenchain.core.network.di.AuthStateProvider
 import com.greenchain.feature.profile.data.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,14 +21,23 @@ data class EditProfileUiState(
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val repo: UserRepository,
-    private val auth: FirebaseAuth
+    private val authStateProvider: AuthStateProvider
 ) : ViewModel() {
 
     private val _ui = MutableStateFlow(EditProfileUiState())
     val ui: StateFlow<EditProfileUiState> = _ui
 
-    fun loadProfile() {
-        val uid = auth.currentUser?.uid ?: return
+    init {
+        viewModelScope.launch {
+            authStateProvider.authState.collectLatest { user ->
+                if (user != null) {
+                    loadProfile(user.uid)
+                }
+            }
+        }
+    }
+
+    private fun loadProfile(uid: String) {
         viewModelScope.launch {
             try {
                 val profile = repo.getUserProfile(uid)
@@ -46,16 +56,24 @@ class EditProfileViewModel @Inject constructor(
         newPhotoUri: Uri?,
         onResult: (Boolean) -> Unit
     ) {
-        val firebaseUser = auth.currentUser ?: return
-        val uid = firebaseUser.uid
+        if (username.isBlank()) {
+            _ui.value = _ui.value.copy(error = "Username cannot be empty")
+            onResult(false)
+            return
+        }
+        if (email.isBlank()) {
+            _ui.value = _ui.value.copy(error = "Email cannot be empty")
+            onResult(false)
+            return
+        }
+
+        val uid = _ui.value.profile?.uid ?: return
 
         viewModelScope.launch {
             _ui.value = _ui.value.copy(isSaving = true, error = null)
 
             try {
-                val current = _ui.value.profile
-                    ?: repo.getUserProfile(uid)
-                    ?: UserProfile(uid = uid, email = firebaseUser.email.orEmpty())
+                val current = _ui.value.profile!!
 
                 val finalPhotoUrl = if (newPhotoUri != null) {
                     repo.uploadProfilePhoto(uid, newPhotoUri)
@@ -91,9 +109,8 @@ class EditProfileViewModel @Inject constructor(
 
     /** Șterge poza de profil (din Storage + din profil) și actualizează UI */
     fun removeProfilePhoto() {
-        val firebaseUser = auth.currentUser ?: return
-        val uid = firebaseUser.uid
-        val currentProfile = _ui.value.profile ?: return
+        val uid = _ui.value.profile?.uid ?: return
+        val currentProfile = _ui.value.profile!!
 
         // dacă nu are poză, nu facem nimic
         if (currentProfile.photoUrl.isBlank()) return

@@ -29,12 +29,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.greenchain.core.database.AppDatabase
 
 import com.greenchain.app.ui.components.BottomNavBar
+import com.greenchain.core.network.di.AuthStateProvider
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var auth: FirebaseAuth
     @Inject lateinit var database: AppDatabase
+    @Inject lateinit var authStateProvider: AuthStateProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,10 +74,20 @@ class MainActivity : ComponentActivity() {
                     Routes.Profile
                 )
 
+                LaunchedEffect(Unit) {
+                    authStateProvider.authState.collect {
+                        if (it == null) {
+                            navController.navigate(Routes.Auth.route) {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            }
+                        }
+                    }
+                }
+
                 Scaffold(
                     bottomBar = {
-                        // Hide bottom bar on onboarding and auth screens
-                        if (currentRoute != Routes.Onboarding.route && currentRoute != Routes.Auth.route) {
+                        // Hide bottom bar on onboarding, auth, and setup screens
+                        if (currentRoute != Routes.Onboarding.route && currentRoute != Routes.Auth.route && currentRoute != Routes.Setup.route) {
                             BottomNavBar(
                                 selectedRoute = currentRoute,
                                 onClick = { route ->
