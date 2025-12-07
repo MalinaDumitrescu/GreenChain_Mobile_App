@@ -53,9 +53,10 @@ class ProfileViewModel @Inject constructor(
             authStateProvider.authState.collectLatest { user ->
                 if (user == null) {
                     uiState = UiState(isLoading = false, error = "You are not logged in.")
-                } else {
-                    loadUserProfile(user.uid)
                 }
+//                } else {
+//                    loadUserProfile(user.uid)
+//                }
             }
         }
 
