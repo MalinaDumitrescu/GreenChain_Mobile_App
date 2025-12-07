@@ -227,6 +227,7 @@ fun HomeScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,   // poți lăsa asta, e ok
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToCreatePost,
@@ -236,18 +237,25 @@ fun HomeScreen(
                 Icon(Icons.Default.Add, contentDescription = "Create Post")
             }
         }
-    ) { paddingValues ->
+    ) { _ ->   // 👈 NU mai folosim paddingValues
         Surface(
             color = MaterialTheme.colorScheme.background,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.fillMaxSize()
         ) {
             Column {
                 TopBar(profileImageUrl = currentUserProfile?.photoUrl)
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(GCSpacing.md),
-                    verticalArrangement = Arrangement.spacedBy(GCSpacing.md)
+                        .padding(
+                            start = GCSpacing.md,
+                            end = GCSpacing.md,
+                            top = GCSpacing.md,
+                            bottom = 0.dp      // 👈 fără spațiu suplimentar jos
+                        ),
+
+                        verticalArrangement = Arrangement.spacedBy(GCSpacing.md)
                 ) {
                     item {
                         if (quoteText != null) {
@@ -257,14 +265,13 @@ fun HomeScreen(
                         }
                     }
 
-                    // Sectiunea Add Friends intre Quote si Quest
                     item {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { showAddFriendDialog = true },
                             colors = CardDefaults.cardColors(
-                                containerColor = BrownLight   // fundal maro închis
+                                containerColor = BrownLight
                             ),
                             shape = RoundedCornerShape(24.dp),
                             elevation = CardDefaults.cardElevation(0.dp)
@@ -279,18 +286,17 @@ fun HomeScreen(
                                 Icon(
                                     imageVector = Icons.Default.PersonAdd,
                                     contentDescription = null,
-                                    tint = Background     // icon bej deschis
+                                    tint = Background
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "Find & Add Friends",
-                                    color = Background,   // text bej deschis
+                                    color = Background,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
                         }
                     }
-
 
                     item {
                         QuestCard(
@@ -311,12 +317,11 @@ fun HomeScreen(
                             onDelete = { homeViewModel.deletePost(post) }
                         )
                     }
-
-                    item { Spacer(Modifier.height(80.dp)) }
                 }
             }
         }
     }
+
 }
 
 private fun formatDate(date: Date?): String {

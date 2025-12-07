@@ -77,14 +77,14 @@ fun BottomNavBar(
                     .clickable { onClick(Routes.Scan.route) },
                 contentAlignment = Alignment.BottomCenter
             ) {
-                Text(
-                    text = Routes.Scan.label,
-                    color = Color(0xFFDDE5B6),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 1.dp)
-                )
+//                Text(
+//                    text = Routes.Scan.label,
+//                    color = Color(0xFFDDE5B6),
+//                    fontSize = 12.sp,
+//                    fontWeight = FontWeight.SemiBold,
+//                    textAlign = TextAlign.Center,
+//                    modifier = Modifier.padding(bottom = 1.dp)
+//                )
             }
 
             NavItem(
@@ -139,24 +139,16 @@ private fun NavItem(
 ) {
     val tint = if (selected) GreenPrimary else Color(0xFFDDE5B6)
 
-    Column(
+    Box(
         modifier = modifier
-            .padding(top = 8.dp)
             .clickable { onClick(route) },
-        horizontalAlignment = Alignment.CenterHorizontally
+        contentAlignment = Alignment.Center
     ) {
-        Icon(icon, contentDescription = label, tint = tint, modifier = Modifier.size(28.dp))
-        Text(
-            text = label,
-            color = tint,
-            style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            softWrap = false,
-            overflow = TextOverflow.Visible,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 2.dp)
+        Icon(
+            icon,
+            contentDescription = label,
+            tint = tint,
+            modifier = Modifier.size(30.dp)
         )
     }
 }
