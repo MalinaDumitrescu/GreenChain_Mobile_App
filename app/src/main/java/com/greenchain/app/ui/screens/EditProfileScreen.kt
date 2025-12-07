@@ -27,11 +27,6 @@ fun EditProfileScreen(
 ) {
     val ui by viewModel.ui.collectAsState()
 
-    // încărcăm profilul când intrăm pe ecran
-    LaunchedEffect(Unit) {
-        viewModel.loadProfile()
-    }
-
     var email by rememberSaveable { mutableStateOf("") }
     var name by rememberSaveable { mutableStateOf("") }
     var username by rememberSaveable { mutableStateOf("") }

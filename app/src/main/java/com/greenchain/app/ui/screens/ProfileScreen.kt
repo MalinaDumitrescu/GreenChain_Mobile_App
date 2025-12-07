@@ -7,12 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,14 +21,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.google.firebase.auth.FirebaseAuth
+import com.greenchain.app.navigation.Routes
+import com.greenchain.app.ui.theme.Background
+import com.greenchain.app.ui.theme.BrownDark
+import com.greenchain.app.ui.theme.BrownLight
+import com.greenchain.app.ui.theme.GreenPrimary
 import com.greenchain.feature.profile.ProfileViewModel
 import com.greenchain.feature.profile.UserProfile
-import com.greenchain.app.ui.theme.Background
-import com.greenchain.app.ui.theme.GreenPrimary
-import com.greenchain.app.ui.theme.BrownLight
-import com.greenchain.app.ui.theme.BrownDark
-import com.greenchain.app.navigation.Routes
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,16 +48,13 @@ fun ProfileScreen(
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val profileUpdated = savedStateHandle?.get<Boolean>("profileUpdated") ?: false
 
-    val currentUid = FirebaseAuth.getInstance().currentUser?.uid
-    val isOwnProfile = viewedUserId == null || viewedUserId == currentUid
+    val isOwnProfile = viewedUserId == null || viewedUserId == profile?.uid
 
     LaunchedEffect(viewedUserId) {
         when {
-            // profilul MEU
-            viewedUserId == null || viewedUserId == currentUid -> {
+            viewedUserId == null -> {
                 viewModel.refreshProfile()
             }
-            // profilul unui PRIETEN
             else -> {
                 viewModel.loadProfileFor(viewedUserId)
             }
@@ -219,11 +210,53 @@ fun ProfileScreen(
                 }
             }
             state.error != null -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
                         text = state.error ?: "Something went wrong",
                         color = MaterialTheme.colorScheme.error
                     )
+
+                    if (isOwnProfile) {
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Button(
+                            onClick = { navController.navigate(Routes.EditProfile.route) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = GreenPrimary.copy(alpha = 0.8f),
+                                contentColor = BrownDark
+                            ),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text("Edit profile", fontWeight = FontWeight.Medium)
+                        }
+
+                        Spacer(Modifier.height(12.dp))
+
+                        Button(
+                            onClick = {
+                                viewModel.logout()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = BrownLight,
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text("Logout", fontWeight = FontWeight.Medium)
+                        }
+                    }
                 }
             }
             profile != null -> {
@@ -456,10 +489,6 @@ fun ProfileScreen(
                                 Button(
                                     onClick = {
                                         viewModel.logout()
-                                        navController.navigate(Routes.Auth.route) {
-                                            popUpTo(Routes.Home.route) { inclusive = true }
-                                            launchSingleTop = true
-                                        }
                                     },
                                     modifier = Modifier
                                         .weight(1f)
