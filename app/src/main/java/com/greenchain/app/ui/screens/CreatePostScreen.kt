@@ -5,6 +5,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -76,15 +78,16 @@ fun CreatePostScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             OutlinedTextField(
                 value = text,
                 onValueChange = { text = it },
                 label = { Text("What's on your mind?") },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                maxLines = 10,
+                    .fillMaxWidth(),
+                minLines = 5,
+                maxLines = 15,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = BrownLight,
                     unfocusedBorderColor = BrownDark,
@@ -101,7 +104,7 @@ fun CreatePostScreen(
                     model = selectedImageUri,
                     contentDescription = "Selected Image",
                     modifier = Modifier.fillMaxWidth(),
-                    contentScale = ContentScale.Fit
+                    contentScale = ContentScale.FillWidth
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 TextButton(onClick = { selectedImageUri = null }) {
