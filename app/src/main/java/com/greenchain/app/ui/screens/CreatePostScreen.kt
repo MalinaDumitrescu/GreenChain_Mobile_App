@@ -15,6 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.greenchain.app.ui.theme.GreenPrimary
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import com.greenchain.app.ui.theme.BrownLight
+import com.greenchain.app.ui.theme.BrownDark
 import com.greenchain.feature.homepage.CreatePostViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,7 +84,14 @@ fun CreatePostScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
-                maxLines = 10
+                maxLines = 10,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = BrownLight,
+                    unfocusedBorderColor = BrownDark,
+                    cursorColor = BrownLight,
+                    focusedLabelColor = BrownLight,
+                    unfocusedLabelColor = BrownDark
+                )
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -95,7 +105,10 @@ fun CreatePostScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 TextButton(onClick = { selectedImageUri = null }) {
-                    Text("Remove Image")
+                    Text(
+                        text = "Remove Image",
+                        color = BrownDark
+                    )
                 }
             } else {
                 Button(
