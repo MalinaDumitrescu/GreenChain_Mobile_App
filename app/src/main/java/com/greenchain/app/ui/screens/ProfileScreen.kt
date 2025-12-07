@@ -48,7 +48,7 @@ fun ProfileScreen(
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val profileUpdated = savedStateHandle?.get<Boolean>("profileUpdated") ?: false
 
-    val isOwnProfile = viewedUserId == null || viewedUserId == profile?.uid
+    val isOwnProfile = viewedUserId == null //|| viewedUserId == profile?.uid
 
     LaunchedEffect(viewedUserId) {
         when {
