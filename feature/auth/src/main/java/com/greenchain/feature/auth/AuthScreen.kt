@@ -36,14 +36,22 @@ fun AuthScreen(
 
         OutlinedTextField(
             value = ui.email, onValueChange = vm::onEmail,
-            label = { Text("Email") }, singleLine = true, modifier = Modifier.fillMaxWidth()
+            label = { Text("Email") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                focusedLabelColor = MaterialTheme.colorScheme.onPrimary
+            )
         )
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
             value = ui.password, onValueChange = vm::onPassword,
             label = { Text("Password") }, singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                focusedLabelColor = MaterialTheme.colorScheme.onPrimary
+            )
         )
 
         Spacer(Modifier.height(16.dp))
@@ -56,7 +64,7 @@ fun AuthScreen(
         TextButton(
             onClick = { vm.register() },
             enabled = !ui.loading
-        ) { Text("Create account") }
+        ) { Text("Create account", color = MaterialTheme.colorScheme.onPrimary) }
 
         ui.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }

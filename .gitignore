@@ -10,6 +10,10 @@ outputs/
 local.properties
 captures/
 
+# Secrets
+google-services.json
+/app/src/main/res/values/secrets.xml
+
 
 /.idea
 
