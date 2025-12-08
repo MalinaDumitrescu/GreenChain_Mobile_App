@@ -1,6 +1,6 @@
 package com.greenchain.model
 
-// This is now a pure data class again, with no ties to the Maps library.
+// This is a pure data class, with no ties to Firebase or any other library.
 data class RecyclingPoint(
     val id: String,
     val name: String,
