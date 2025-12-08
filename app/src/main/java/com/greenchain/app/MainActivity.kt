@@ -75,8 +75,9 @@ class MainActivity : ComponentActivity() {
                 )
 
                 LaunchedEffect(Unit) {
-                    authStateProvider.authState.collect {
-                        if (it == null) {
+                    authStateProvider.authState.collect { user ->
+                        val isOnOnboarding = navController.currentDestination?.route == Routes.Onboarding.route
+                        if (user == null && !isOnOnboarding) {
                             navController.navigate(Routes.Auth.route) {
                                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
                             }
