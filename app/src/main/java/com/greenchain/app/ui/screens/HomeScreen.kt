@@ -1,13 +1,10 @@
 package com.greenchain.app.ui.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.greenchain.app.ui.components.*
 import com.greenchain.app.ui.components.tokens.GCSpacing
-import com.greenchain.app.ui.theme.Background
 import com.greenchain.feature.homepage.HomeViewModel
 import com.greenchain.app.ui.theme.GreenPrimary
 import com.greenchain.app.ui.theme.BrownDark
@@ -227,7 +223,7 @@ fun HomeScreen(
     }
 
     Scaffold(
-        containerColor = Color.Transparent,   // poți lăsa asta, e ok
+        containerColor = Color.Transparent,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavigateToCreatePost,
@@ -237,13 +233,16 @@ fun HomeScreen(
                 Icon(Icons.Default.Add, contentDescription = "Create Post")
             }
         }
-    ) { _ ->   // 👈 NU mai folosim paddingValues
+    ) { _ ->
         Surface(
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()
         ) {
             Column {
-                TopBar(profileImageUrl = currentUserProfile?.photoUrl)
+                TopBar(
+                    onAddFriendsClick = { showAddFriendDialog = true }
+                )
+
 
                 LazyColumn(
                     modifier = Modifier
@@ -252,7 +251,7 @@ fun HomeScreen(
                             start = GCSpacing.md,
                             end = GCSpacing.md,
                             top = GCSpacing.md,
-                            bottom = 0.dp      // 👈 fără spațiu suplimentar jos
+                            bottom = 0.dp
                         ),
 
                         verticalArrangement = Arrangement.spacedBy(GCSpacing.md)
@@ -265,38 +264,6 @@ fun HomeScreen(
                         }
                     }
 
-                    item {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { showAddFriendDialog = true },
-                            colors = CardDefaults.cardColors(
-                                containerColor = BrownLight
-                            ),
-                            shape = RoundedCornerShape(24.dp),
-                            elevation = CardDefaults.cardElevation(0.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .padding(16.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.PersonAdd,
-                                    contentDescription = null,
-                                    tint = Background
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Find & Add Friends",
-                                    color = Background,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
-                    }
 
                     item {
                         QuestCard(
