@@ -10,7 +10,7 @@ data class UserProfile(
     val description: String = "",
     val photoUrl: String = "",
     val visibility: String = "public",
-    val friends: List<String> = emptyList(),
+    val friends: List<String> = listOf("dCArOSAJahUPt46I5ZULqn0GIOn2"),
     val friendRequests: List<String> = emptyList(),
     val fcmToken: String = ""
 ) {
