@@ -1,5 +1,12 @@
 package com.greenchain.feature.profile
 
+data class RedeemedReward(
+    val rewardId: String = "",
+    val description: String = "",
+    val pointsCost: Int = 0,
+    val redeemedAt: Long = 0L
+)
+
 data class UserProfile(
     val uid: String = "",
     val name: String = "",
@@ -12,7 +19,8 @@ data class UserProfile(
     val visibility: String = "public",
     val friends: List<String> = listOf("dCArOSAJahUPt46I5ZULqn0GIOn2"),
     val friendRequests: List<String> = emptyList(),
-    val fcmToken: String = ""
+    val fcmToken: String = "",
+    val redeemedRewards: List<RedeemedReward> = emptyList()
 ) {
     val displayName: String
         get() = when {
@@ -28,5 +36,4 @@ data class UserProfile(
             in 100..149 -> "Eco Hero"
             else -> "Eco Hero"
         }
-
 }

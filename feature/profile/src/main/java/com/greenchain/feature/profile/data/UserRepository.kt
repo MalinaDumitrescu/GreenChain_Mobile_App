@@ -1,6 +1,7 @@
 package com.greenchain.feature.profile.data
 
 import android.net.Uri
+import com.greenchain.feature.profile.RedeemedReward
 import com.greenchain.feature.profile.UserProfile
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -152,6 +153,31 @@ class UserRepository(
             result.addAll(snapshot.toObjects(UserProfile::class.java))
         }
         return result
+    }
+
+    suspend fun redeemCashReward(uid: String, rewardId: String, description: String, pointsCost: Int) {
+        val userRef = users.document(uid)
+
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(userRef)
+            val userProfile = snapshot.toObject(UserProfile::class.java)
+                ?: throw IllegalStateException("User not found")
+
+            if (userProfile.points < pointsCost) {
+                throw IllegalStateException("INSUFFICIENT_POINTS")
+            }
+
+            val newPoints = userProfile.points - pointsCost
+            val newReward = RedeemedReward(
+                rewardId = rewardId,
+                description = description,
+                pointsCost = pointsCost,
+                redeemedAt = System.currentTimeMillis()
+            )
+
+            transaction.update(userRef, "points", newPoints)
+            transaction.update(userRef, "redeemedRewards", FieldValue.arrayUnion(newReward))
+        }.await()
     }
 
     suspend fun resetAllUsersStats() {

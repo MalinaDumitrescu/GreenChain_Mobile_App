@@ -107,21 +107,38 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
+    fun redeemReward(rewardId: String, description: String, pointsCost: Int) {
+        val uid = _ui.value.profile?.uid ?: return
+
+        viewModelScope.launch {
+            _ui.value = _ui.value.copy(isSaving = true, error = null)
+            try {
+                repo.redeemCashReward(uid, rewardId, description, pointsCost)
+
+                val updatedProfile = repo.getUserProfile(uid)
+                _ui.value = _ui.value.copy(isSaving = false, profile = updatedProfile)
+
+            } catch (e: Exception) {
+                _ui.value = _ui.value.copy(
+                    isSaving = false,
+                    error = e.message
+                )
+            }
+        }
+    }
+
     /** Șterge poza de profil (din Storage + din profil) și actualizează UI */
     fun removeProfilePhoto() {
         val uid = _ui.value.profile?.uid ?: return
         val currentProfile = _ui.value.profile!!
 
-        // dacă nu are poză, nu facem nimic
         if (currentProfile.photoUrl.isBlank()) return
 
         viewModelScope.launch {
             _ui.value = _ui.value.copy(isSaving = true, error = null)
             try {
-                // ștergem fișierul + resetăm photoUrl în Firestore
                 repo.deleteProfilePhoto(uid)
 
-                // actualizăm și UI-ul local
                 val updated = currentProfile.copy(photoUrl = "")
                 _ui.value = _ui.value.copy(
                     profile = updated,
