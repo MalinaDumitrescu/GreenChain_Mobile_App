@@ -15,6 +15,8 @@ import com.greenchain.feature.map.MapScreen
 import com.greenchain.feature.profile.ProfileViewModel
 import com.greenchain.app.ui.screens.ProfileScreen
 import com.greenchain.app.ui.screens.EditProfileScreen
+import com.greenchain.feature.profile.EditProfileViewModel
+import com.greenchain.feature.profile.RewardsScreen
 import com.greenchain.feature.setup.SetupScreen
 import com.google.firebase.auth.FirebaseAuth
 
@@ -61,6 +63,7 @@ fun AppNavGraph(
 
         composable(Routes.Home.route) {
             HomeScreen(
+                navController = navController, // ERROR FIXED
                 onNavigateToCreatePost = {
                     navController.navigate(Routes.CreatePost.route)
                 }
@@ -90,6 +93,14 @@ fun AppNavGraph(
 
         composable(Routes.Leaderboard.route) {
             LeaderboardScreen()
+        }
+
+        composable(Routes.Rewards.route) {
+            val vm: EditProfileViewModel = hiltViewModel()
+            RewardsScreen(
+                viewModel = vm,
+                navController = navController
+            )
         }
 
         composable(Routes.Profile.route) {

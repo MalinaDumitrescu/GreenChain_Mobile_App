@@ -5,29 +5,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CameraAlt
-import androidx.compose.material.icons.outlined.EmojiEvents
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.greenchain.app.navigation.Routes
-import com.greenchain.app.ui.theme.BrownDark         // #6C584C
-import com.greenchain.app.ui.theme.GreenPrimary      // #DDE5B6
+import com.greenchain.app.ui.theme.BrownDark
+import com.greenchain.app.ui.theme.GreenPrimary
 
 @Composable
 fun BottomNavBar(
@@ -43,7 +33,7 @@ fun BottomNavBar(
                 WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
             )
     ) {
-        // Bara cu 5 sloturi egale
+        // Bar with 5 slots
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -52,60 +42,17 @@ fun BottomNavBar(
                 .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            NavItem(
-                label = Routes.Home.label,
-                route = Routes.Home.route,
-                icon = Icons.Outlined.Home,
-                selected = selectedRoute == Routes.Home.route,
-                onClick = onClick,
-                modifier = Modifier.weight(1f)
-            )
-            NavItem(
-                label = Routes.Map.label,
-                route = Routes.Map.route,
-                icon = Icons.Outlined.Map,
-                selected = selectedRoute == Routes.Map.route,
-                onClick = onClick,
-                modifier = Modifier.weight(1f)
-            )
+            NavItem(Routes.Home.label, Routes.Home.route, Icons.Outlined.Home, selectedRoute == Routes.Home.route, onClick, Modifier.weight(1f))
+            NavItem(Routes.Map.label, Routes.Map.route, Icons.Outlined.Map, selectedRoute == Routes.Map.route, onClick, Modifier.weight(1f))
 
-            //Scan text
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable { onClick(Routes.Scan.route) },
-                contentAlignment = Alignment.BottomCenter
-            ) {
-//                Text(
-//                    text = Routes.Scan.label,
-//                    color = Color(0xFFDDE5B6),
-//                    fontSize = 12.sp,
-//                    fontWeight = FontWeight.SemiBold,
-//                    textAlign = TextAlign.Center,
-//                    modifier = Modifier.padding(bottom = 1.dp)
-//                )
-            }
+            // Placeholder for the central scan button
+            Box(modifier = Modifier.weight(1f).fillMaxHeight())
 
-            NavItem(
-                label = Routes.Leaderboard.label,
-                route = Routes.Leaderboard.route,
-                icon = Icons.Outlined.EmojiEvents,
-                selected = selectedRoute == Routes.Leaderboard.route,
-                onClick = onClick,
-                modifier = Modifier.weight(1f)
-            )
-            NavItem(
-                label = Routes.Profile.label,
-                route = Routes.Profile.route,
-                icon = Icons.Outlined.Person,
-                selected = selectedRoute == Routes.Profile.route,
-                onClick = onClick,
-                modifier = Modifier.weight(1f)
-            )
+            NavItem(Routes.Leaderboard.label, Routes.Leaderboard.route, Icons.Outlined.EmojiEvents, selectedRoute == Routes.Leaderboard.route, onClick, Modifier.weight(1f))
+            NavItem(Routes.Profile.label, Routes.Profile.route, Icons.Outlined.Person, selectedRoute == Routes.Profile.route, onClick, Modifier.weight(1f))
         }
 
-        //Scan imagine
+        // Scan Button
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -140,8 +87,7 @@ private fun NavItem(
     val tint = if (selected) GreenPrimary else Color(0xFFDDE5B6)
 
     Box(
-        modifier = modifier
-            .clickable { onClick(route) },
+        modifier = modifier.clickable { onClick(route) },
         contentAlignment = Alignment.Center
     ) {
         Icon(
