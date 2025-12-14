@@ -19,85 +19,79 @@ import androidx.navigation.NavController
 import com.greenchain.app.navigation.Routes
 import com.greenchain.app.ui.components.*
 import com.greenchain.app.ui.components.tokens.GCSpacing
-import com.greenchain.feature.homepage.HomeViewModel
-import com.greenchain.app.ui.theme.GreenPrimary
 import com.greenchain.app.ui.theme.BrownDark
 import com.greenchain.app.ui.theme.BrownLight
+import com.greenchain.app.ui.theme.GreenPrimary
+import com.greenchain.feature.homepage.HomeViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @Composable
 fun HomeScreen(
-    navController: NavController, // Added NavController
+    navController: NavController,
     onNavigateToCreatePost: () -> Unit = {}
 ) {
     val homeViewModel: HomeViewModel = hiltViewModel()
+
     val quoteText by homeViewModel.quoteText.collectAsState()
     val isQuestCompleted by homeViewModel.isQuestCompleted.collectAsState()
     val dailyQuest by homeViewModel.dailyQuest.collectAsState()
     val posts by homeViewModel.postsFlow.collectAsState(initial = emptyList())
     val currentUserId = homeViewModel.currentUserId
     val currentUserProfile by homeViewModel.currentUserProfile.collectAsState()
+
     var showQuestDialog by remember { mutableStateOf(false) }
     var showAddFriendDialog by remember { mutableStateOf(false) }
+
     val searchResults by homeViewModel.searchResults.collectAsState()
     val friendRequestStatus by homeViewModel.friendRequestStatus.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
+
     val bottlesCount = currentUserProfile?.bottleCount ?: 0
-    // ... (rest of the state variables)
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Scaffold(
-            containerColor = Color.Transparent,
-            floatingActionButton = {
-                // This is now just a placeholder, the real FABs are in the Box
-            }
-        ) { _ ->
-            Surface(
-                color = MaterialTheme.colorScheme.background,
-                modifier = Modifier.fillMaxSize()
-            ) {
+    val questProgress = if (isQuestCompleted) 1.0f else 0.0f
+    val questStatusText = if (isQuestCompleted) "1/1" else "0/1"
+
+    // -------------------- QUEST DIALOG --------------------
+    if (showQuestDialog) {
+        AlertDialog(
+            onDismissRequest = { showQuestDialog = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = {
+                Text(
+                    text = "Daily Quest",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = BrownDark
+                )
+            },
+            text = {
                 Column {
-                    TopBar(
-                        onAddFriendsClick = { /* Logic for adding friends */ }
+                    Text(
+                        text = "Your mission for today:",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(
-                                start = GCSpacing.md,
-                                end = GCSpacing.md,
-                                top = GCSpacing.md,
-                                bottom = 0.dp
-                            ),
-                        verticalArrangement = Arrangement.spacedBy(GCSpacing.md)
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = GreenPrimary.copy(alpha = 0.1f)
+                        ),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        // ... (rest of LazyColumn items)
-                        item {
-                            if (quoteText != null) {
-                                QuoteCard(quote = quoteText!!)
-                            } else {
-                                QuoteCard()
-                            }
-                        }
-                        item {
-                            QuestCard(
-                                title = dailyQuest?.title ?: "Quest of the day",
-                                progress = if (isQuestCompleted) 1.0f else 0.0f,
-                                onView = { /* Logic for viewing quest */ }
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = dailyQuest?.title ?: "Loading...",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = BrownDark
                             )
-                        }
-                        items(posts) { post ->
-                            CommunityPostCard(
-                                author = post.authorName,
-                                time = formatDate(post.timestamp),
-                                text = post.text,
-                                imageUrl = post.imageUrl ?: "",
-                                avatarUrl = post.authorAvatarUrl,
-                                isAuthor = post.authorId == currentUserId,
-                                onDelete = { homeViewModel.deletePost(post) }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = dailyQuest?.description ?: "",
+                                style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }
@@ -155,9 +149,161 @@ fun HomeScreen(
                     }
                 }
             }
+        )
+    }
+
+    // -------------------- ADD FRIEND DIALOG --------------------
+    if (showAddFriendDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showAddFriendDialog = false
+                homeViewModel.clearSearch()
+                searchQuery = ""
+            },
+            title = { Text("Find Friends", color = BrownDark) },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = {
+                            searchQuery = it
+                            homeViewModel.searchUsers(it)
+                        },
+                        label = { Text("Search by username") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = GreenPrimary,
+                            focusedLabelColor = BrownDark
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
+                        items(searchResults) { user ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column {
+                                    Text(
+                                        text = user.displayName,
+                                        fontWeight = FontWeight.Medium,
+                                        color = BrownDark
+                                    )
+                                    if (user.username.isNotBlank()) {
+                                        Text(
+                                            text = "@${user.username}",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = BrownLight
+                                        )
+                                    }
+                                }
+                                Button(
+                                    onClick = { homeViewModel.sendFriendRequest(user.uid) },
+                                    colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                                    modifier = Modifier.height(32.dp)
+                                ) {
+                                    Text(
+                                        "Add",
+                                        color = BrownDark,
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
+                            }
+                            Divider(color = GreenPrimary.copy(alpha = 0.3f))
+                        }
+                    }
+
+                    if (searchResults.isEmpty() && searchQuery.isNotEmpty()) {
+                        Text("No users found", style = MaterialTheme.typography.bodySmall, color = BrownLight)
+                    }
+
+                    friendRequestStatus?.let { status ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = status,
+                            color = if (status.contains("sent", true)) GreenPrimary else MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showAddFriendDialog = false
+                        homeViewModel.clearSearch()
+                        searchQuery = ""
+                    }
+                ) { Text("Close", color = BrownDark) }
+            }
+        )
+    }
+
+    // -------------------- MAIN SCREEN --------------------
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            containerColor = Color.Transparent
+        ) { _ ->
+            Surface(
+                color = MaterialTheme.colorScheme.background,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Column {
+                    TopBar(
+                        onAddFriendsClick = { showAddFriendDialog = true }
+                    )
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(
+                                start = GCSpacing.md,
+                                end = GCSpacing.md,
+                                top = GCSpacing.md,
+                                bottom = 0.dp
+                            ),
+                        verticalArrangement = Arrangement.spacedBy(GCSpacing.md)
+                    ) {
+                        item {
+                            if (quoteText != null) QuoteCard(quote = quoteText!!) else QuoteCard()
+                        }
+
+                        item {
+                            SavingsCard(bottlesCount = bottlesCount)
+                        }
+
+                        item {
+                            QuestCard(
+                                title = dailyQuest?.title ?: "Quest of the day",
+                                progress = questProgress,
+                                onView = { showQuestDialog = true }
+                            )
+                        }
+
+                        items(posts) { post ->
+                            CommunityPostCard(
+                                author = post.authorName,
+                                time = formatDate(post.timestamp),
+                                text = post.text,
+                                imageUrl = post.imageUrl ?: "",
+                                avatarUrl = post.authorAvatarUrl,
+                                isAuthor = post.authorId == currentUserId,
+                                onDelete = { homeViewModel.deletePost(post) }
+                            )
+                        }
+                    }
+                }
+            }
         }
 
-        // Stack of Floating Action Buttons
+        // Stacked FABs (Rewards + Create Post)
         Column(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -165,81 +311,22 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Rewards FAB
             FloatingActionButton(
                 onClick = { navController.navigate(Routes.Rewards.route) },
                 shape = CircleShape,
-                containerColor = Color.White, // White background
-                contentColor = BrownDark,      // Dark icon
+                containerColor = Color.White,
+                contentColor = BrownDark,
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(Icons.Default.ConfirmationNumber, contentDescription = "Go to Rewards")
             }
 
-            // Create Post FAB
             FloatingActionButton(
                 onClick = onNavigateToCreatePost,
                 containerColor = GreenPrimary,
                 contentColor = BrownDark
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Create Post")
-            }
-        }
-    ) { _ ->
-        Surface(
-            color = MaterialTheme.colorScheme.background,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Column {
-                TopBar(
-                    onAddFriendsClick = { showAddFriendDialog = true }
-                )
-
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(
-                            start = GCSpacing.md,
-                            end = GCSpacing.md,
-                            top = GCSpacing.md,
-                            bottom = 0.dp
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(GCSpacing.md)
-                ) {
-                    item {
-                        if (quoteText != null) {
-                            QuoteCard(quote = quoteText!!)
-                        } else {
-                            QuoteCard()
-                        }
-                    }
-
-                    item {
-                        SavingsCard(
-                            bottlesCount = bottlesCount
-                        )
-                    }
-
-                    item {
-                        QuestCard(
-                            title = dailyQuest?.title ?: "Quest of the day",
-                            progress = questProgress,
-                            onView = { showQuestDialog = true }
-                        )
-                    }
-
-                    items(posts) { post ->
-                        CommunityPostCard(
-                            author = post.authorName,
-                            time = formatDate(post.timestamp),
-                            text = post.text,
-                            imageUrl = post.imageUrl ?: "",
-                            avatarUrl = post.authorAvatarUrl,
-                            isAuthor = post.authorId == currentUserId,
-                            onDelete = { homeViewModel.deletePost(post) }
-                        )
-                    }
-                }
             }
         }
     }
@@ -250,5 +337,3 @@ private fun formatDate(date: Date?): String {
     val sdf = SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault())
     return sdf.format(date)
 }
-
-
