@@ -312,6 +312,27 @@ class ProfileViewModel @Inject constructor(
         uiState = UiState(isLoading = true, error = null, userProfile = null, username = "")
     }
 
+    fun deleteAccount() {
+        viewModelScope.launch {
+            uiState = uiState.copy(isLoading = true)
+            val user = auth.currentUser
+            if (user != null) {
+                try {
+                    userRepo.deleteUserProfile(user.uid)
+                    user.delete().await()
+                    uiState = UiState(isLoading = false, error = null, userProfile = null, username = "")
+                } catch (e: Exception) {
+                    uiState = uiState.copy(
+                        isLoading = false,
+                        error = e.localizedMessage ?: "Failed to delete account."
+                    )
+                }
+            } else {
+                uiState = uiState.copy(isLoading = false, error = "You are not logged in.")
+            }
+        }
+    }
+
     fun resetAllStatsForDev() {
         viewModelScope.launch {
             runCatching {

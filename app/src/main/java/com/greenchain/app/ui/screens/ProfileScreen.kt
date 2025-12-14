@@ -44,6 +44,9 @@ fun ProfileScreen(
     var showAddFriendDialog by remember { mutableStateOf(false) }
     var showFriendsSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    var showMenu by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
 
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
     val profileUpdated = savedStateHandle?.get<Boolean>("profileUpdated") ?: false
@@ -120,6 +123,30 @@ fun ProfileScreen(
                 }
             },
             dismissButton = {}
+        )
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Account") },
+            text = { Text("Are you sure you want to delete your account? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteAccount()
+                        showDeleteDialog = false
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 
@@ -269,13 +296,43 @@ fun ProfileScreen(
                 ) {
                     item {
                         // Header
-                        Text(
-                            text = "Profile",
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = BrownDark,
-                            modifier = Modifier.padding(bottom = 20.dp)
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 20.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Profile",
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = BrownDark
+                            )
+                            if (isOwnProfile) {
+                                Box {
+                                    IconButton(onClick = { showMenu = !showMenu }) {
+                                        Icon(
+                                            imageVector = Icons.Default.MoreVert,
+                                            contentDescription = "More options",
+                                            tint = BrownDark
+                                        )
+                                    }
+                                    DropdownMenu(
+                                        expanded = showMenu,
+                                        onDismissRequest = { showMenu = false }
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text("Delete Account") },
+                                            onClick = {
+                                                showMenu = false
+                                                showDeleteDialog = true
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
 
                         // 1. MAIN PROFILE CARD
                         Card(
