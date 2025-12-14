@@ -210,4 +210,21 @@ class UserRepository(
         // 2. Update Firestore
         users.document(uid).update("photoUrl", "").await()
     }
+
+    suspend fun deleteUserProfile(uid: String) {
+        val userProfile = getUserProfile(uid)
+        val normalizedUsername = userProfile?.username?.let { normalize(it) }
+
+        firestore.runTransaction { transaction ->
+            // 1. Delete user document from 'users' collection
+            val userRef = users.document(uid)
+            transaction.delete(userRef)
+
+            // 2. Delete username from 'usernames' collection
+            if (normalizedUsername?.isNotEmpty() == true) {
+                val usernameRef = usernames.document(normalizedUsername)
+                transaction.delete(usernameRef)
+            }
+        }.await()
+    }
 }
