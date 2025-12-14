@@ -3,8 +3,10 @@ package com.greenchain.app.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ConfirmationNumber
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,6 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavController
+import com.greenchain.app.navigation.Routes
 import com.greenchain.app.ui.components.*
 import com.greenchain.app.ui.components.tokens.GCSpacing
 import com.greenchain.feature.homepage.HomeViewModel
@@ -25,7 +29,7 @@ import java.util.Locale
 
 @Composable
 fun HomeScreen(
-    onContinue: () -> Unit = {},
+    navController: NavController, // Added NavController
     onNavigateToCreatePost: () -> Unit = {}
 ) {
     val homeViewModel: HomeViewModel = hiltViewModel()
@@ -41,46 +45,59 @@ fun HomeScreen(
     val friendRequestStatus by homeViewModel.friendRequestStatus.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     val bottlesCount = currentUserProfile?.bottleCount ?: 0
+    // ... (rest of the state variables)
 
-    val questProgress = if (isQuestCompleted) 1.0f else 0.0f
-    val questStatusText = if (isQuestCompleted) "1/1" else "0/1"
-
-    if (showQuestDialog) {
-        AlertDialog(
-            onDismissRequest = { showQuestDialog = false },
-            containerColor = MaterialTheme.colorScheme.surface,
-            title = {
-                Text(
-                    text = "Daily Quest",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = BrownDark
-                )
-            },
-            text = {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            floatingActionButton = {
+                // This is now just a placeholder, the real FABs are in the Box
+            }
+        ) { _ ->
+            Surface(
+                color = MaterialTheme.colorScheme.background,
+                modifier = Modifier.fillMaxSize()
+            ) {
                 Column {
-                    Text(
-                        text = "Your mission for today:",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    TopBar(
+                        onAddFriendsClick = { /* Logic for adding friends */ }
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
 
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = GreenPrimary.copy(alpha = 0.1f)),
-                        modifier = Modifier.fillMaxWidth()
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(
+                                start = GCSpacing.md,
+                                end = GCSpacing.md,
+                                top = GCSpacing.md,
+                                bottom = 0.dp
+                            ),
+                        verticalArrangement = Arrangement.spacedBy(GCSpacing.md)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = dailyQuest?.title ?: "Loading...",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = BrownDark
+                        // ... (rest of LazyColumn items)
+                        item {
+                            if (quoteText != null) {
+                                QuoteCard(quote = quoteText!!)
+                            } else {
+                                QuoteCard()
+                            }
+                        }
+                        item {
+                            QuestCard(
+                                title = dailyQuest?.title ?: "Quest of the day",
+                                progress = if (isQuestCompleted) 1.0f else 0.0f,
+                                onView = { /* Logic for viewing quest */ }
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = dailyQuest?.description ?: "",
-                                style = MaterialTheme.typography.bodySmall
+                        }
+                        items(posts) { post ->
+                            CommunityPostCard(
+                                author = post.authorName,
+                                time = formatDate(post.timestamp),
+                                text = post.text,
+                                imageUrl = post.imageUrl ?: "",
+                                avatarUrl = post.authorAvatarUrl,
+                                isAuthor = post.authorId == currentUserId,
+                                onDelete = { homeViewModel.deletePost(post) }
                             )
                         }
                     }
@@ -138,96 +155,28 @@ fun HomeScreen(
                     }
                 }
             }
-        )
-    }
+        }
 
-    if (showAddFriendDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                showAddFriendDialog = false
-                homeViewModel.clearSearch()
-                searchQuery = ""
-            },
-            title = { Text("Find Friends", color = BrownDark) },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = {
-                            searchQuery = it
-                            homeViewModel.searchUsers(it)
-                        },
-                        label = { Text("Search by username") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = GreenPrimary,
-                            focusedLabelColor = BrownDark
-                        )
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    LazyColumn(modifier = Modifier.heightIn(max = 200.dp)) {
-                        items(searchResults) { user ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Column {
-                                    Text(text = user.displayName, fontWeight = FontWeight.Medium, color = BrownDark)
-                                    if (user.username.isNotBlank()) {
-                                        Text(text = "@${user.username}", style = MaterialTheme.typography.bodySmall, color = BrownLight)
-                                    }
-                                }
-                                Button(
-                                    onClick = { homeViewModel.sendFriendRequest(user.uid) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary),
-                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                                    modifier = Modifier.height(32.dp)
-                                ) {
-                                    Text("Add", color = BrownDark, style = MaterialTheme.typography.labelMedium)
-                                }
-                            }
-                            Divider(color = GreenPrimary.copy(alpha = 0.3f))
-                        }
-                    }
-
-                    if (searchResults.isEmpty() && searchQuery.isNotEmpty()) {
-                        Text("No users found", style = MaterialTheme.typography.bodySmall, color = BrownLight)
-                    }
-
-                    friendRequestStatus?.let { status ->
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = status,
-                            color = if (status.contains("sent", true)) GreenPrimary else MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showAddFriendDialog = false
-                        homeViewModel.clearSearch()
-                        searchQuery = ""
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = BrownDark)
-                ) {
-                    Text("Close")
-                }
+        // Stack of Floating Action Buttons
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Rewards FAB
+            FloatingActionButton(
+                onClick = { navController.navigate(Routes.Rewards.route) },
+                shape = CircleShape,
+                containerColor = Color.White, // White background
+                contentColor = BrownDark,      // Dark icon
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(Icons.Default.ConfirmationNumber, contentDescription = "Go to Rewards")
             }
-        )
-    }
 
-    Scaffold(
-        containerColor = Color.Transparent,
-        floatingActionButton = {
+            // Create Post FAB
             FloatingActionButton(
                 onClick = onNavigateToCreatePost,
                 containerColor = GreenPrimary,
@@ -301,3 +250,5 @@ private fun formatDate(date: Date?): String {
     val sdf = SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault())
     return sdf.format(date)
 }
+
+
