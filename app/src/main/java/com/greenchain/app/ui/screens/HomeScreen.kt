@@ -40,6 +40,7 @@ fun HomeScreen(
     val searchResults by homeViewModel.searchResults.collectAsState()
     val friendRequestStatus by homeViewModel.friendRequestStatus.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
+    val bottlesCount = currentUserProfile?.bottleCount ?: 0
 
     val questProgress = if (isQuestCompleted) 1.0f else 0.0f
     val questStatusText = if (isQuestCompleted) "1/1" else "0/1"
@@ -98,7 +99,9 @@ fun HomeScreen(
 
                     LinearProgressIndicator(
                         progress = questProgress,
-                        modifier = Modifier.fillMaxWidth().height(8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp),
                         color = GreenPrimary,
                         trackColor = GreenPrimary.copy(alpha = 0.2f),
                         strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
@@ -107,7 +110,7 @@ fun HomeScreen(
                     if (isQuestCompleted) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Quest Completed! 🎉",
+                            text = "Quest Completed!",
                             color = GreenPrimary,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.labelLarge
@@ -243,7 +246,6 @@ fun HomeScreen(
                     onAddFriendsClick = { showAddFriendDialog = true }
                 )
 
-
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -253,8 +255,7 @@ fun HomeScreen(
                             top = GCSpacing.md,
                             bottom = 0.dp
                         ),
-
-                        verticalArrangement = Arrangement.spacedBy(GCSpacing.md)
+                    verticalArrangement = Arrangement.spacedBy(GCSpacing.md)
                 ) {
                     item {
                         if (quoteText != null) {
@@ -264,6 +265,11 @@ fun HomeScreen(
                         }
                     }
 
+                    item {
+                        SavingsCard(
+                            bottlesCount = bottlesCount
+                        )
+                    }
 
                     item {
                         QuestCard(
@@ -288,7 +294,6 @@ fun HomeScreen(
             }
         }
     }
-
 }
 
 private fun formatDate(date: Date?): String {
