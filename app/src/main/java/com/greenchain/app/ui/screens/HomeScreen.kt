@@ -38,6 +38,13 @@ fun HomeScreen(
     val dailyQuest by homeViewModel.dailyQuest.collectAsState()
     val posts by homeViewModel.postsFlow.collectAsState(initial = emptyList())
     val currentUserId = homeViewModel.currentUserId
+    val currentUserProfile by homeViewModel.currentUserProfile.collectAsState()
+    var showQuestDialog by remember { mutableStateOf(false) }
+    var showAddFriendDialog by remember { mutableStateOf(false) }
+    val searchResults by homeViewModel.searchResults.collectAsState()
+    val friendRequestStatus by homeViewModel.friendRequestStatus.collectAsState()
+    var searchQuery by remember { mutableStateOf("") }
+    val bottlesCount = currentUserProfile?.bottleCount ?: 0
     // ... (rest of the state variables)
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -94,6 +101,58 @@ fun HomeScreen(
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Progress", fontWeight = FontWeight.Medium)
+                        Text(questStatusText, fontWeight = FontWeight.Bold, color = BrownDark)
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    LinearProgressIndicator(
+                        progress = questProgress,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp),
+                        color = GreenPrimary,
+                        trackColor = GreenPrimary.copy(alpha = 0.2f),
+                        strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                    )
+
+                    if (isQuestCompleted) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Quest Completed!",
+                            color = GreenPrimary,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                if (!isQuestCompleted) {
+                    Button(
+                        onClick = {
+                            homeViewModel.completeDailyQuest()
+                            showQuestDialog = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
+                    ) {
+                        Text("Mark as Done", color = BrownDark)
+                    }
+                } else {
+                    Button(
+                        onClick = { showQuestDialog = false },
+                        colors = ButtonDefaults.buttonColors(containerColor = GreenPrimary)
+                    ) {
+                        Text("Close", color = BrownDark)
+                    }
                 }
             }
         }
@@ -124,6 +183,63 @@ fun HomeScreen(
                 contentColor = BrownDark
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Create Post")
+            }
+        }
+    ) { _ ->
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Column {
+                TopBar(
+                    onAddFriendsClick = { showAddFriendDialog = true }
+                )
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = GCSpacing.md,
+                            end = GCSpacing.md,
+                            top = GCSpacing.md,
+                            bottom = 0.dp
+                        ),
+                    verticalArrangement = Arrangement.spacedBy(GCSpacing.md)
+                ) {
+                    item {
+                        if (quoteText != null) {
+                            QuoteCard(quote = quoteText!!)
+                        } else {
+                            QuoteCard()
+                        }
+                    }
+
+                    item {
+                        SavingsCard(
+                            bottlesCount = bottlesCount
+                        )
+                    }
+
+                    item {
+                        QuestCard(
+                            title = dailyQuest?.title ?: "Quest of the day",
+                            progress = questProgress,
+                            onView = { showQuestDialog = true }
+                        )
+                    }
+
+                    items(posts) { post ->
+                        CommunityPostCard(
+                            author = post.authorName,
+                            time = formatDate(post.timestamp),
+                            text = post.text,
+                            imageUrl = post.imageUrl ?: "",
+                            avatarUrl = post.authorAvatarUrl,
+                            isAuthor = post.authorId == currentUserId,
+                            onDelete = { homeViewModel.deletePost(post) }
+                        )
+                    }
+                }
             }
         }
     }
