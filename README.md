@@ -5,24 +5,24 @@
 
 ---
 
-## 🚀 Overview
+##  Overview
 GreenChain encourages users to recycle by turning eco-friendly actions into a game.
 Users can:
-- 📸 Scan bottles with the **SGR logo** using AI (RoboFlow).
-- 🏅 Earn points and climb the **leaderboard**.
-- 🤝 Connect with friends, share eco-posts, and complete daily quests.
-- 🗺️ Find nearby recycling spots on an interactive map.
+-  Scan bottles with the **SGR logo** using AI (RoboFlow).
+-  Earn points and climb the **leaderboard**.
+-  Connect with friends, share eco-posts, and complete daily quests.
+-  Find nearby recycling spots on an interactive map.
 
 ---
 
-## 🎨 Mockups
+##  Mockups
 
 
 ![mock-up_GreenChain](https://github.com/user-attachments/assets/10e3cad5-4444-45f7-823e-c5c711e48d2b)
 
 ---
 
-## ⚙️ Core Features
+##  Core Features
 | Feature | Description |
 |----------|--------------|
 | **AI Bottle Recognition** | Detect SGR logos via RoboFlow API and CameraX |
@@ -34,7 +34,7 @@ Users can:
 
 ---
 
-## 🧩 Architecture
+##  Architecture
 **Pattern:** Clean MVVM
 - **Model:** Data (Room, Firebase, APIs)
 - **ViewModel:** Business logic & state
@@ -45,7 +45,7 @@ Kotlin · Jetpack Compose · CameraX · Firebase · RoboFlow · Retrofit · Hilt
 
 ---
 
-## 🚀 Setup
+##  Setup
 
 ### Google Maps API Key
 
@@ -70,7 +70,7 @@ To enable the map feature, you need to add a Google Maps API key.
 
 ---
 
-## 🧱 UML Diagrams
+##  UML Diagrams
 
 <p align="center">
 <img width="1290" height="1705" alt="UseCaseD_GreenChain_UserFacing" src="https://github.com/user-attachments/assets/49fbee45-2dc7-49a6-9321-561a0ff5cb16" />
@@ -95,14 +95,14 @@ To enable the map feature, you need to add a Google Maps API key.
 
 ---
 
-## 🔒 Security
+##  Security
 - Firebase Authentication for login
 - Firestore security rules
 - Secure API keys and local permissions handling
 
 ---
 
-## 🧑‍💻 Team
+##  Team
 Developed by a 3-person Informatics team passionate about sustainability and mobile innovation:
 - Dumitrescu Malina
 - Janine Vartolomei
